@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "427303093265",
+    "firebase_url": "https://eparkir-3aba2.firebaseio.com",
+    "project_id": "eparkir-3aba2",
+    "storage_bucket": "eparkir-3aba2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427303093265:android:c51886c10238a624601db0",
+        "android_client_info": {
+          "package_name": "com.example.eparkir"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427303093265-gq8s6kk6tvh0jlhn4tcuhn5bq9ichp79.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-ddakSCwuP7hIsII4zRjIqHdjotPIyS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427303093265-gq8s6kk6tvh0jlhn4tcuhn5bq9ichp79.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
