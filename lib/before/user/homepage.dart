@@ -1,5 +1,6 @@
-import 'package:eparkir/bloc/nis_bloc.dart';
-import 'package:eparkir/ui/page/template.dart';
+
+import 'package:eparkir/before/template.dart';
+import 'package:eparkir/services/bloc/nis_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
