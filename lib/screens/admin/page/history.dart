@@ -1,56 +1,63 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class Data extends StatefulWidget {
+class History extends StatefulWidget {
   @override
-  _DataState createState() => _DataState();
+  _HistoryState createState() => _HistoryState();
 }
 
-class _DataState extends State<Data> {
+class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        title: Text("History"),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("Data Siswa :"),
-                GestureDetector(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue, width: 1.5),
-                      borderRadius: BorderRadius.circular(5),
+                Container(
+                  width: width / 1.6,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 1.5),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("Senin, xx xx xxxx"),
+                  ),
+                ),
+                SizedBox(
+                  width: 15.0,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blue, width: 1.5),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("Choose Date")),
                     ),
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          height: 30,
-                          margin: EdgeInsets.only(right: 5),
-                          child: Icon(Icons.arrow_left),
-                        ),
-                        Icon(
-                          Icons.search,
-                          color: Colors.red,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 3, right: 3),
-                          child: Container(
-                            height: 18,
-                            width: 1.5,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Icon(Icons.list)
-                      ],
-                    ),
+                    onTap: () {
+                      chooseDate();
+                    },
                   ),
                 ),
               ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0, left: 8.0),
+            child: Text("Urutkan berdasarkan :"),
           ),
           Flexible(
             child: Container(
@@ -104,7 +111,6 @@ class _DataState extends State<Data> {
           Text(
             no.toString(),
           ),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
@@ -113,7 +119,6 @@ class _DataState extends State<Data> {
                 nis.toString(),
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
@@ -122,7 +127,6 @@ class _DataState extends State<Data> {
                 nama,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
@@ -131,13 +135,12 @@ class _DataState extends State<Data> {
                 kelas,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
         ),
       ],
     );
   }
 
-  void tapped(nis, nama, kelas, context) {
+  void chooseDate() {
     final height = MediaQuery.of(context).size.height;
     showDialog(
         context: context,
@@ -146,70 +149,18 @@ class _DataState extends State<Data> {
             title: Text('Detail Data Siswa'),
             content: Container(
               height: height / 5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(nis.toString()),
-                  Text(nama),
-                  Text(kelas),
-                ],
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (_) {},
               ),
             ),
             actions: <Widget>[
-              FlatButton(
-                color: Colors.red,
-                child: Text("Hapus"),
-                onPressed: () {},
-              ),
               FlatButton(
                 color: Colors.blue,
-                child: Text("Ubah"),
-                onPressed: () {
-                  editData(nis, nama, kelas, height);
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  void editData(nis, nama, kelas, height) {
-    TextEditingController controllerNis =
-        TextEditingController(text: nis.toString());
-    TextEditingController controllerNama = TextEditingController(text: nama);
-    TextEditingController controllerKelas = TextEditingController(text: kelas);
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Ubah Data"),
-            content: Container(
-              height: height / 3,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  TextField(
-                    maxLength: 8,
-                    keyboardType: TextInputType.number,
-                    controller: controllerNis,
-                  ),
-                  TextField(
-                    controller: controllerNama,
-                  ),
-                  TextField(
-                    controller: controllerKelas,
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                color: Colors.green,
-                child: Text("Simpan"),
+                child: Text("OK"),
                 onPressed: () {
                   Navigator.pop(context);
                 },
-              )
+              ),
             ],
           );
         });
