@@ -121,7 +121,7 @@ class _HomeState extends State<Home> {
             indent: 20,
             endIndent: 20,
           ),
-          Flexible(
+          Expanded(
             child: Container(
               width: double.infinity,
               height: height,
