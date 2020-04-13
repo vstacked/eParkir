@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/screens/admin/homeAdmin.dart';
 import 'package:eparkir/screens/user/homeUser.dart';
+import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -11,37 +13,20 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   int _level;
   int _state = 0;
-  String admin = "1";
-  String user = "2";
-  void animateButton(input) {
-    setState(() {
-      _state = 1;
-      Timer(Duration(seconds: 1), () {
-        if (input == admin) {
-          _level = 1;
-          onSuccess(_level);
-        } else if (input == user) {
-          _level = 0;
-          onSuccess(_level);
-        } else {
-          setState(() {
-            _state = 3;
-          });
-        }
-      });
-    });
-  }
 
-  void onSuccess(_level) {
+  void onSuccess(_level, id) {
     setState(() {
       _state = 2;
       if (_state == 2) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => MyApp(
-                      level: _level,
-                    )));
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyApp(
+                    level: _level,
+                    id: id,
+                  )),
+          (Route<dynamic> route) => false,
+        );
       }
     });
   }
@@ -79,31 +64,32 @@ class _LoginState extends State<Login> {
     }
   }
 
-  TextEditingController controller = TextEditingController();
-  @override
-  Widget build(BuildContext context) {
+  void ifState() {
     if (_state == 2) {
       setState(() {
         controller.clear();
       });
     }
     if (_state == 3) {
-      Timer(Duration(milliseconds: 1500), () {
-        setState(() {
-          _state = 0;
-          controller.clear();
-        });
+      setState(() {
+        _state = 0;
+        controller.clear();
       });
     }
+  }
 
-    double width = MediaQuery.of(context).size.width;
+  TextEditingController controller = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    ifState();
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(controller.text),
+              Text("Login"),
               Container(
                 width: width / 1.5,
                 child: TextField(
@@ -122,7 +108,8 @@ class _LoginState extends State<Login> {
                 onPressed: () {
                   setState(() {
                     if (_state == 0) {
-                      animateButton(controller.text);
+                      _state = 1;
+                      checkUser(controller.text);
                     }
                   });
                 },
@@ -134,11 +121,48 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+  Future checkUser(String nis) async {
+    final QuerySnapshot snapshot = await databaseReference
+        .collection("db")
+        .where('nis', isEqualTo: nis)
+        .getDocuments();
+    final List<DocumentSnapshot> list = snapshot.documents;
+
+    if (list.length == 0) {
+      setState(() {
+        _state = 3;
+      });
+    } else {
+      sendData(nis);
+    }
+  }
+
+  void sendData(nis) {
+    setState(() {
+      databaseReference
+          .collection('db')
+          .where('nis', isEqualTo: nis)
+          .snapshots()
+          .listen((data) => data.documents.forEach((doc) {
+                String id = doc.documentID;
+                String levelR = doc['level'];
+
+                if (levelR == '0') {
+                  _level = 0;
+                } else {
+                  _level = 1;
+                }
+                onSuccess(_level, id);
+              }));
+    });
+  }
 }
 
 class MyApp extends StatefulWidget {
+  final String id;
   final int level;
-  MyApp({this.level});
+  MyApp({this.level, this.id});
   @override
   State<StatefulWidget> createState() {
     return MyAppState();
@@ -150,7 +174,13 @@ class MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-      child: (widget.level == 1) ? HomeAdmin() : HomeUser(),
+      child: (widget.level == 1)
+          ? HomeAdmin(
+              id: widget.id,
+            )
+          : HomeUser(
+              id: widget.id,
+            ),
     ));
   }
 }

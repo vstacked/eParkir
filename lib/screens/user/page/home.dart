@@ -1,7 +1,13 @@
 import 'package:eparkir/screens/user/page/showQr.dart';
+import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/widgets/user/home/type1/banner.dart';
+import 'package:eparkir/widgets/user/home/type1/quote.dart';
+import 'package:eparkir/widgets/user/home/type2/sudahScan.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
+  final String id;
+  Home({this.id});
   @override
   _HomeState createState() => _HomeState();
 }
@@ -44,13 +50,30 @@ class _HomeState extends State<Home> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text("Selamat Datang, User"),
-            ),
+            welcome(),
             (resul11t == "") ? type1(height, width) : type2(height, width)
           ],
         ),
+      ),
+    );
+  }
+
+  Padding welcome() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: StreamBuilder(
+        stream:
+            databaseReference.collection('db').document(widget.id).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Text(
+              '',
+            );
+          } else {
+            String nama = snapshot.data['nama'];
+            return Text("Selamat Datang, $nama");
+          }
+        },
       ),
     );
   }
@@ -59,49 +82,8 @@ class _HomeState extends State<Home> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            width: width / 1.5,
-            height: height / 3,
-            color: Colors.amber,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Sekarang Pukul :"),
-                  Text(
-                    "06.50",
-                    style: TextStyle(fontSize: 40),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "10 menit lagi kamu akan terlambat!",
-                    style: TextStyle(
-                        color: Colors.red, fontStyle: FontStyle.italic),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.only(top: 20.0, bottom: 30.0),
-            child: Container(
-              decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 250, maxHeight: 50),
-                    child: Text(
-                      "Quoutasdsadsadijsaodsjaosid usaidjasldjaslasdasdasdsadasadsadasdsaasdasdkdjsaldkjasldjaslkdaso idusao iduoa isjudae",
-                      overflow: TextOverflow.fade,
-                    )),
-              ),
-            )),
+        banner(width, height),
+        quote(),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0),
           child: Center(
@@ -146,139 +128,117 @@ class _HomeState extends State<Home> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          datang(width, height),
+          pulang(width, height, _pulang),
+          (_pulang == 0)
+              ? sudahScan(height, width, 0)
+              : (text == "Belum Pulang")
+                  ? scanSebelumPulang()
+                  : sudahScan(height, width, 1)
+        ],
+      ),
+    );
+  }
+
+  Padding scanSebelumPulang() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      child: Column(
+        children: <Widget>[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0),
-            child: Container(
-              width: width / 1.5,
-              height: height / 7,
-              color: Colors.red,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("Datang :"),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(
-                        "06.50",
-                        style: TextStyle(fontSize: 40),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: Center(
+                child: Text(
+              "Scan sebelum pulang!",
+              style: TextStyle(color: Colors.red),
+            )),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              width: width / 1.5,
-              height: height / 7,
-              color: Colors.red,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("Pulang :"),
-                  ),
-                  Padding(
+          Center(
+            child: Column(
+              children: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    press();
+                  },
+                  child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(
-                        (_pulang == 1) ? text : "Belum Pulang",
-                        style: TextStyle(fontSize: 20),
-                      ),
+                    child: new Icon(
+                      Icons.code,
+                      color: Colors.white,
+                      size: 50.0,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          (_pulang == 0)
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40.0),
-                  child: Container(
-                    height: height / 5,
-                    width: width,
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.red)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          "Sudah Scan datang",
-                          style: TextStyle(color: Colors.green),
-                        ),
-                      ),
-                    ),
-                  ),
+                  shape: new CircleBorder(),
+                  color: Colors.blue,
+                ),
+                Text(
+                  "Tap untuk scan",
+                  style: TextStyle(fontSize: 10),
                 )
-              : (text == "Belum Pulang")
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 30.0),
-                            child: Center(
-                                child: Text(
-                              "Scan sebelum pulang!",
-                              style: TextStyle(color: Colors.red),
-                            )),
-                          ),
-                          Center(
-                            child: Column(
-                              children: <Widget>[
-                                FlatButton(
-                                  onPressed: () {
-                                    press();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: new Icon(
-                                      Icons.code,
-                                      color: Colors.white,
-                                      size: 50.0,
-                                    ),
-                                  ),
-                                  shape: new CircleBorder(),
-                                  color: Colors.blue,
-                                ),
-                                Text(
-                                  "Tap untuk scan",
-                                  style: TextStyle(fontSize: 10),
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40.0),
-                      child: Container(
-                        height: height / 5,
-                        width: width,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.red)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              "Sudah Scan pulang",
-                              style: TextStyle(color: Colors.green),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
+              ],
+            ),
+          )
         ],
+      ),
+    );
+  }
+
+  Align pulang(width, height, int _pulang) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        width: width / 1.5,
+        height: height / 7,
+        color: Colors.red,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text("Pulang :"),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(
+                  (_pulang == 1) ? text : "Belum Pulang",
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Padding datang(width, height) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30.0),
+      child: Container(
+        width: width / 1.5,
+        height: height / 7,
+        color: Colors.red,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text("Datang :"),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(
+                  "06.50",
+                  style: TextStyle(fontSize: 40),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

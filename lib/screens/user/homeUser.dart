@@ -3,15 +3,18 @@ import 'package:eparkir/screens/user/page/home.dart';
 import 'package:flutter/material.dart';
 
 class HomeUser extends StatefulWidget {
+  final String id;
+  HomeUser({this.id});
   @override
   _HomeUserState createState() => _HomeUserState();
 }
 
 class _HomeUserState extends State<HomeUser> {
   int _selectedPage = 0;
-  final _pageOption = [Home(), History()];
+
   @override
   Widget build(BuildContext context) {
+    final _pageOption = [Home(id: widget.id), History()];
     return Scaffold(
       body: _pageOption[_selectedPage],
       bottomNavigationBar: BottomNavigationBar(
