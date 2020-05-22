@@ -13,7 +13,10 @@ class _HistoryState extends State<History> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: history(width, height, context),
+      body: HistoryBody(
+        width: width,
+        height: height,
+      ),
     );
   }
 }

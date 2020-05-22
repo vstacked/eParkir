@@ -13,9 +13,13 @@ class _HistoryState extends State<History> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-        appBar: AppBar(
-          title: Text("History"),
-        ),
-        body: history(width, height, context));
+      appBar: AppBar(
+        title: Text("History"),
+      ),
+      body: HistoryBody(
+        height: height,
+        width: width,
+      ),
+    );
   }
 }

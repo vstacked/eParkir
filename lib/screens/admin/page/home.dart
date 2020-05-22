@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/screens/admin/page/history.dart';
 import 'package:eparkir/screens/admin/page/scanner.dart';
 import 'package:eparkir/screens/admin/page/showAll.dart';
+import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   final String id;
@@ -17,6 +19,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
+
+    String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.camera_alt),
@@ -47,47 +51,49 @@ class _HomeState extends State<Home> {
               height: height,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: table(),
+                child: StreamBuilder(
+                  stream: databaseReference
+                      .collection('database')
+                      .document('tanggal')
+                      .collection(datePick)
+                      .orderBy('nis')
+                      .limit(10)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    int no = 1;
+                    QuerySnapshot data = snapshot.data;
+                    List<DocumentSnapshot> documentSnapshot =
+                        (data?.documents != null) ? data.documents : [];
+                    return DataTable(
+                      horizontalMargin: 10,
+                      headingRowHeight: 40,
+                      columnSpacing: 10,
+                      columns: <DataColumn>[
+                        DataColumn(
+                          label: Text("No."),
+                        ),
+                        DataColumn(
+                          label: Text("NIS"),
+                        ),
+                        DataColumn(
+                          label: Text("Nama"),
+                        ),
+                        DataColumn(
+                          label: Text("Kelas"),
+                        ),
+                      ],
+                      rows: [
+                        for (var d in documentSnapshot)
+                          dataRow(no++, d['nis'], d['nama'], d['kelas'])
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  DataTable table() {
-    return DataTable(
-      sortColumnIndex: 0,
-      horizontalMargin: 10,
-      headingRowHeight: 40,
-      columnSpacing: 10,
-      sortAscending: true,
-      columns: <DataColumn>[
-        DataColumn(
-          label: Text("No."),
-        ),
-        DataColumn(label: Text("NIS")),
-        DataColumn(label: Text("Nama")),
-        DataColumn(label: Text("Kelas")),
-      ],
-      rows: <DataRow>[
-        dataRow(1, 17006912, 'akasdsadasdsadsasdsadasdasdsadsadsadsau',
-            'XII RPL A'),
-        dataRow(2, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006112, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII RPL A'),
-        dataRow(1, 17006912, 'aku', 'XII TITL A'),
-        dataRow(1, 17006912, 'aku', 'XII TITL A'),
-        dataRow(1, 17006912, 'aku', 'XII TITL A'),
-        dataRow(1, 17006912, 'aku', 'XII TITL A'),
-        dataRow(1, 17006912, 'aku', 'XII TITL A'),
-      ],
     );
   }
 
@@ -146,23 +152,50 @@ class _HomeState extends State<Home> {
       color: Colors.amber,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[Text("Belum Hadir"), Text("10")],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[Text("Hadir"), Text("26")],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[Text("Jumlah"), Text("36")],
-            ),
-          ],
-        ),
+        child: StreamBuilder(
+            stream: databaseReference.collection('siswa').snapshots(),
+            builder: (context, snapshot) {
+              QuerySnapshot data = snapshot.data;
+              int total = (data?.documents != null) ? data.documents.length : 0;
+              int hadir = 0;
+              int belumHadir = 0;
+
+              List<DocumentSnapshot> documentSnapshot =
+                  (data?.documents != null) ? data.documents : [];
+              documentSnapshot.forEach((f) {
+                var a = f.data['kelas'];
+                switch (a) {
+                  case "XII RPL A":
+                    hadir++;
+                    break;
+                  case "XII RPL B":
+                    belumHadir++;
+                    break;
+                  default:
+                }
+              });
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Belum Hadir"),
+                      Text("$belumHadir")
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[Text("Hadir"), Text("$hadir")],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[Text("Jumlah"), Text("$total")],
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
@@ -183,7 +216,11 @@ class _HomeState extends State<Home> {
         ],
       ),
       onTap: () {
-        print("GestureDetector Tapped");
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Login()),
+          (Route<dynamic> route) => false,
+        );
       },
     );
   }
@@ -194,9 +231,7 @@ class _HomeState extends State<Home> {
           databaseReference.collection('db').document(widget.id).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Text(
-            '',
-          );
+          return Container();
         } else {
           String nama = snapshot.data['nama'];
           return Text("Selamat Datang, $nama");
@@ -205,7 +240,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  DataRow dataRow(int no, int nis, nama, kelas) {
+  DataRow dataRow(int no, String nis, nama, kelas) {
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(no.toString())),

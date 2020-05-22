@@ -58,7 +58,8 @@ class _SecondPageState extends State<SecondPage> {
           ),
           RaisedButton(
             onPressed: () {
-              nisBloc.dispatch(nis);
+              // nisBloc.dispatch(nis);
+              nisBloc.add(nis);
               _addDataToFirestore();
             },
             child: Text("Input"),

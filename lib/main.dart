@@ -17,18 +17,13 @@ void main() => runApp(Home());
 //   }
 // }
 
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
+class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.blueAccent));
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
-    return MaterialApp(home: Login());
+    // SystemChrome.setPreferredOrientations(
+    //     [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+    return MaterialApp(home: SafeArea(child: Login()));
   }
 }

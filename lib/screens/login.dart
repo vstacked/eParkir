@@ -11,114 +11,156 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  int _level;
   int _state = 0;
+  FocusNode nisFocus = FocusNode();
+  final _key = new GlobalKey<FormState>();
+  TextEditingController controller;
+  bool isEnable = true;
 
-  void onSuccess(_level, id) {
-    setState(() {
-      _state = 2;
-      if (_state == 2) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MyApp(
-                    level: _level,
-                    id: id,
-                  )),
-          (Route<dynamic> route) => false,
-        );
-      }
-    });
+  void onSuccess(level, id) {
+    _state = 2;
+    controller.clear();
+
+    if (level == '1') {
+      pushAndRemoveUntil(HomeAdmin(
+        id: id,
+      ));
+    } else {
+      pushAndRemoveUntil(HomeUser(
+        id: id,
+      ));
+    }
+  }
+
+  Future pushAndRemoveUntil(Widget to) {
+    return Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => to),
+      (Route<dynamic> route) => false,
+    );
   }
 
   Widget setUpButtonChild() {
-    if (_state == 0) {
-      return new Text(
-        "Login",
-        style: const TextStyle(
-          color: Colors.blue,
-          fontSize: 16.0,
-        ),
-      );
-    } else if (_state == 1) {
-      return Container(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 3.0,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-        ),
-      );
-    } else if (_state == 2) {
-      return Icon(Icons.check, color: Colors.blue);
-    } else if (_state == 3) {
-      return Text(
-        "Data Tidak Ada",
-        style: const TextStyle(
-          color: Colors.blue,
-          fontSize: 16.0,
-        ),
-      );
-    } else {
-      return Container();
+    switch (_state) {
+      case 0:
+        return new Text(
+          "Login",
+          style: const TextStyle(
+            color: Colors.blue,
+            fontSize: 16.0,
+          ),
+        );
+        break;
+      case 1:
+        isEnable = false;
+        return Container(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 3.0,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          ),
+        );
+        break;
+      case 2:
+        afterClick();
+        return Icon(Icons.check, color: Colors.blue);
+        break;
+      case 3:
+        Timer(Duration(seconds: 2), () {
+          afterClick();
+        });
+        return Text(
+          "Data Tidak Ada",
+          style: const TextStyle(
+            color: Colors.blue,
+            fontSize: 16.0,
+          ),
+        );
+        break;
+      default:
+        return Container();
     }
   }
 
-  void ifState() {
-    if (_state == 2) {
-      setState(() {
-        controller.clear();
-      });
-    }
-    if (_state == 3) {
-      setState(() {
-        _state = 0;
-        controller.clear();
-      });
-    }
+  afterClick() {
+    setState(() {
+      _state = 0;
+      isEnable = true;
+      controller.clear();
+    });
   }
 
-  TextEditingController controller = TextEditingController();
+  @override
+  void initState() {
+    controller = TextEditingController();
+    controller.clear();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    ifState();
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("Login"),
-              Container(
-                width: width / 1.5,
-                child: TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  maxLength: 8,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(), hintText: 'Masukkan NIS..'),
-                ),
-              ),
-              MaterialButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    side: BorderSide(color: Colors.blue)),
-                child: setUpButtonChild(),
-                onPressed: () {
-                  setState(() {
-                    if (_state == 0) {
-                      _state = 1;
-                      checkUser(controller.text);
-                    }
-                  });
-                },
-                elevation: 4.0,
-              ),
-            ],
-          ),
+      body: Center(
+        child: Form(
+          key: _key,
+          child: buildLogin(width),
         ),
       ),
+    );
+  }
+
+  Column buildLogin(double width) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text("Login"),
+        Container(
+          width: width / 1.5,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            maxLength: 8,
+            focusNode: nisFocus,
+            validator: (e) {
+              return (e.isEmpty) ? "Please Insert NIS" : null;
+            },
+            enabled: isEnable,
+            onFieldSubmitted: (value) {
+              if (_state == 0) {
+                _state = 1;
+                checkUser(controller.text);
+                nisFocus.unfocus();
+              }
+            },
+            decoration: InputDecoration(
+                border: OutlineInputBorder(), hintText: 'Masukkan NIS..'),
+          ),
+        ),
+        MaterialButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: Colors.blue)),
+          child: setUpButtonChild(),
+          onPressed: () {
+            setState(() {
+              if (_key.currentState.validate()) if (_state == 0) {
+                _state = 1;
+                checkUser(controller.text);
+                nisFocus.unfocus();
+              }
+            });
+          },
+          elevation: 4.0,
+        ),
+      ],
     );
   }
 
@@ -148,39 +190,8 @@ class _LoginState extends State<Login> {
                 String id = doc.documentID;
                 String levelR = doc['level'];
 
-                if (levelR == '0') {
-                  _level = 0;
-                } else {
-                  _level = 1;
-                }
-                onSuccess(_level, id);
+                onSuccess(levelR, id);
               }));
     });
-  }
-}
-
-class MyApp extends StatefulWidget {
-  final String id;
-  final int level;
-  MyApp({this.level, this.id});
-  @override
-  State<StatefulWidget> createState() {
-    return MyAppState();
-  }
-}
-
-class MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-      child: (widget.level == 1)
-          ? HomeAdmin(
-              id: widget.id,
-            )
-          : HomeUser(
-              id: widget.id,
-            ),
-    ));
   }
 }

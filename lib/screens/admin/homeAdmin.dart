@@ -17,7 +17,7 @@ class _HomeAdminState extends State<HomeAdmin> {
   Widget build(BuildContext context) {
     final _pageOption = [Home(id: widget.id), Data()];
     return Scaffold(
-      body: _pageOption[_selectedPage],
+      body: SafeArea(child: _pageOption[_selectedPage]),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedPage,
         onTap: (int index) {

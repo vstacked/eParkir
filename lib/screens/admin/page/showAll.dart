@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ShowAll extends StatefulWidget {
   @override
@@ -7,6 +10,13 @@ class ShowAll extends StatefulWidget {
 }
 
 class _ShowAllState extends State<ShowAll> {
+  String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+  bool _sortNameAsc = true;
+  bool _sortAsc = true;
+  int _sortColumnIndex;
+
+  String orderByValue;
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -35,36 +45,88 @@ class _ShowAllState extends State<ShowAll> {
               height: height,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: DataTable(
-                  sortColumnIndex: 0,
-                  horizontalMargin: 10,
-                  headingRowHeight: 40,
-                  columnSpacing: 10,
-                  sortAscending: true,
-                  columns: <DataColumn>[
-                    DataColumn(
-                      label: Text("No."),
-                    ),
-                    DataColumn(label: Text("NIS")),
-                    DataColumn(label: Text("Nama")),
-                    DataColumn(label: Text("Kelas")),
-                  ],
-                  rows: <DataRow>[
-                    dataRow(1, 17006912,
-                        'akasdsadasdsadsasdsadasdasdsadsadsadsau', 'XII RPL A'),
-                    dataRow(2, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006112, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII TITL A'),
-                  ],
+                child: StreamBuilder(
+                  stream: (orderByValue != null)
+                      ? databaseReference
+                          .collection('database')
+                          .document('tanggal')
+                          .collection(datePick)
+                          .orderBy(orderByValue, descending: !_sortAsc)
+                          .snapshots()
+                      : databaseReference
+                          .collection('database')
+                          .document('tanggal')
+                          .collection(datePick)
+                          .snapshots(),
+                  builder: (context, snapshot) {
+                    int no = 1;
+                    QuerySnapshot data = snapshot.data;
+                    List<DocumentSnapshot> documentSnapshot =
+                        (data?.documents != null) ? data.documents : [];
+
+                    return DataTable(
+                      horizontalMargin: 10,
+                      headingRowHeight: 40,
+                      columnSpacing: 10,
+                      sortColumnIndex: _sortColumnIndex,
+                      sortAscending: _sortAsc,
+                      columns: <DataColumn>[
+                        DataColumn(
+                          label: Text("No."),
+                        ),
+                        DataColumn(
+                          label: Text("NIS"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'nis';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortNameAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortNameAsc;
+                              }
+                            });
+                          },
+                        ),
+                        DataColumn(
+                          label: Text("Nama"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'nama';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortNameAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortNameAsc;
+                              }
+                            });
+                          },
+                        ),
+                        DataColumn(
+                          label: Text("Kelas"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'kelas';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortNameAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortNameAsc;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                      rows: [
+                        for (var d in documentSnapshot)
+                          dataRow(
+                              no++, d['nis'], d['nama'], d['kelas'], context, d)
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -74,7 +136,7 @@ class _ShowAllState extends State<ShowAll> {
     );
   }
 
-  DataRow dataRow(int no, int nis, nama, kelas) {
+  DataRow dataRow(int no, String nis, nama, kelas, context, dyn) {
     return DataRow(
       cells: <DataCell>[
         DataCell(
@@ -86,9 +148,10 @@ class _ShowAllState extends State<ShowAll> {
           ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 60),
               child: Text(
-                nis.toString(),
+                nis,
                 overflow: TextOverflow.ellipsis,
               )),
+          onTap: () => tapped(nis, nama, kelas, context, dyn),
         ),
         DataCell(
           ConstrainedBox(
@@ -97,6 +160,7 @@ class _ShowAllState extends State<ShowAll> {
                 nama,
                 overflow: TextOverflow.ellipsis,
               )),
+          onTap: () => tapped(nis, nama, kelas, context, dyn),
         ),
         DataCell(
           ConstrainedBox(
@@ -105,8 +169,41 @@ class _ShowAllState extends State<ShowAll> {
                 kelas,
                 overflow: TextOverflow.ellipsis,
               )),
+          onTap: () => tapped(nis, nama, kelas, context, dyn),
         ),
       ],
     );
+  }
+
+  void tapped(nis, nama, kelas, context, dyn) {
+    final height = MediaQuery.of(context).size.height;
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Detail Data Siswa'),
+            content: Container(
+              height: height / 5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(nis.toString()),
+                  Text(nama),
+                  Text(kelas),
+                  Text("datang ${dyn['datang']}"),
+                  Text("pulang ${dyn['pulang']}"),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                  color: Colors.blue,
+                  child: Text("Close"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ],
+          );
+        });
   }
 }
