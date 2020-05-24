@@ -6,6 +6,7 @@ import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   final String id;
@@ -15,12 +16,51 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  void resetPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("value", 2);
+    preferences.setString("id", '');
+  }
+
+  String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+  void changeToFalse() async {
+    var test2 = await databaseReference
+        .collection('siswa')
+        .where('hadir', isEqualTo: true)
+        .getDocuments();
+    test2.documents.forEach((f) {
+      String id = f.documentID;
+      Firestore.instance
+          .collection('siswa')
+          .document(id)
+          .updateData({'hadir': false});
+    });
+  }
+
+  void checkDay() async {
+    var test2 = await databaseReference
+        .collection('database')
+        .document('tanggal')
+        .collection(datePick)
+        .getDocuments();
+
+    if (test2.documents.length == 0) {
+      changeToFalse();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkDay();
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
-    String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.camera_alt),
@@ -56,7 +96,7 @@ class _HomeState extends State<Home> {
                       .collection('database')
                       .document('tanggal')
                       .collection(datePick)
-                      .orderBy('nis')
+                      .orderBy('datang')
                       .limit(10)
                       .snapshots(),
                   builder: (context, snapshot) {
@@ -81,10 +121,14 @@ class _HomeState extends State<Home> {
                         DataColumn(
                           label: Text("Kelas"),
                         ),
+                        DataColumn(
+                          label: Text("Datang"),
+                        ),
                       ],
                       rows: [
                         for (var d in documentSnapshot)
-                          dataRow(no++, d['nis'], d['nama'], d['kelas'])
+                          dataRow(no++, d['nis'], d['nama'], d['kelas'],
+                              d['datang'])
                       ],
                     );
                   },
@@ -153,7 +197,10 @@ class _HomeState extends State<Home> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: StreamBuilder(
-            stream: databaseReference.collection('siswa').snapshots(),
+            stream: databaseReference
+                .collection('siswa')
+                .where('level', isEqualTo: 0)
+                .snapshots(),
             builder: (context, snapshot) {
               QuerySnapshot data = snapshot.data;
               int total = (data?.documents != null) ? data.documents.length : 0;
@@ -163,17 +210,16 @@ class _HomeState extends State<Home> {
               List<DocumentSnapshot> documentSnapshot =
                   (data?.documents != null) ? data.documents : [];
               documentSnapshot.forEach((f) {
-                var a = f.data['kelas'];
+                bool a = f.data['hadir'];
                 switch (a) {
-                  case "XII RPL A":
+                  case true:
                     hadir++;
-                    break;
-                  case "XII RPL B":
-                    belumHadir++;
+
                     break;
                   default:
                 }
               });
+              belumHadir = (hadir != 0) ? total - hadir : total;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -216,6 +262,7 @@ class _HomeState extends State<Home> {
         ],
       ),
       onTap: () {
+        resetPref();
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => Login()),
@@ -228,19 +275,25 @@ class _HomeState extends State<Home> {
   StreamBuilder<DocumentSnapshot> welcome() {
     return StreamBuilder(
       stream:
-          databaseReference.collection('db').document(widget.id).snapshots(),
+          databaseReference.collection('siswa').document(widget.id).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container();
         } else {
-          String nama = snapshot.data['nama'];
-          return Text("Selamat Datang, $nama");
+          String nama =
+              (snapshot.data.exists) ? snapshot.data.data['nama'] : '';
+          return ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 250),
+              child: Text(
+                "Selamat Datang, $nama",
+                overflow: TextOverflow.ellipsis,
+              ));
         }
       },
     );
   }
 
-  DataRow dataRow(int no, String nis, nama, kelas) {
+  DataRow dataRow(int no, String nis, nama, kelas, datang) {
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(no.toString())),
@@ -251,7 +304,7 @@ class _HomeState extends State<Home> {
               overflow: TextOverflow.ellipsis,
             ))),
         DataCell(ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 150),
+            constraints: BoxConstraints(maxWidth: 80),
             child: Text(
               nama,
               overflow: TextOverflow.ellipsis,
@@ -260,6 +313,12 @@ class _HomeState extends State<Home> {
             constraints: BoxConstraints(maxWidth: 60),
             child: Text(
               kelas,
+              overflow: TextOverflow.ellipsis,
+            ))),
+        DataCell(ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 60),
+            child: Text(
+              datang,
               overflow: TextOverflow.ellipsis,
             ))),
       ],

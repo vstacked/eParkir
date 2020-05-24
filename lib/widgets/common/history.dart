@@ -17,10 +17,15 @@ class _HistoryBodyState extends State<HistoryBody> {
   String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
   bool _sortNameAsc = true;
+  bool _sortNisAsc = true;
+  bool _sortKelasAsc = true;
   bool _sortAsc = true;
   int _sortColumnIndex;
 
   String orderByValue;
+
+  String textSearch;
+  final TextEditingController tecSearch = new TextEditingController();
 
   void _pickDateDialog() {
     showDatePicker(
@@ -43,6 +48,15 @@ class _HistoryBodyState extends State<HistoryBody> {
         _selectedDate = pickedDate;
         datePick = DateFormat('dd-MM-yyyy').format(_selectedDate);
       });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    tecSearch.clear();
+    setState(() {
+      textSearch = "";
     });
   }
 
@@ -93,9 +107,52 @@ class _HistoryBodyState extends State<HistoryBody> {
             ],
           ),
         ),
+        TextField(
+          controller: tecSearch,
+          onChanged: (val) {
+            setState(() {
+              textSearch = val;
+            });
+          },
+          decoration: new InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: 'Search...',
+              suffixIcon: (textSearch != '')
+                  ? IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        tecSearch.clear();
+                        setState(() {
+                          textSearch = "";
+                        });
+                      },
+                    )
+                  : null),
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0, left: 8.0),
-          child: Text("Urutkan berdasarkan :"),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text("Urutkan berdasarkan :"),
+              GestureDetector(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 1.5),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Padding(
+                      padding: const EdgeInsets.all(8.0), child: Text("Reset")),
+                ),
+                onTap: () {
+                  setState(() {
+                    orderByValue = null;
+                    _sortColumnIndex = null;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         Flexible(
           child: Container(
@@ -104,18 +161,26 @@ class _HistoryBodyState extends State<HistoryBody> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: StreamBuilder(
-                  stream: (orderByValue != null)
+                  stream: (textSearch != '')
                       ? databaseReference
                           .collection('database')
                           .document('tanggal')
                           .collection(datePick)
-                          .orderBy(orderByValue, descending: !_sortAsc)
+                          .where('nisSearch', arrayContains: textSearch)
                           .snapshots()
-                      : databaseReference
-                          .collection('database')
-                          .document('tanggal')
-                          .collection(datePick)
-                          .snapshots(),
+                      : (orderByValue != null)
+                          ? databaseReference
+                              .collection('database')
+                              .document('tanggal')
+                              .collection(datePick)
+                              .orderBy(orderByValue, descending: !_sortAsc)
+                              .snapshots()
+                          : databaseReference
+                              .collection('database')
+                              .document('tanggal')
+                              .collection(datePick)
+                              .orderBy('datang')
+                              .snapshots(),
                   builder: (context, snapshot) {
                     int no = 1;
                     QuerySnapshot data = snapshot.data;
@@ -139,10 +204,10 @@ class _HistoryBodyState extends State<HistoryBody> {
                               orderByValue = 'nis';
                               setState(() {
                                 if (columnIndex == _sortColumnIndex) {
-                                  _sortAsc = _sortNameAsc = sortAscending;
+                                  _sortAsc = _sortNisAsc = sortAscending;
                                 } else {
                                   _sortColumnIndex = columnIndex;
-                                  _sortAsc = _sortNameAsc;
+                                  _sortAsc = _sortNisAsc;
                                 }
                               });
                             },
@@ -169,10 +234,10 @@ class _HistoryBodyState extends State<HistoryBody> {
                               orderByValue = 'kelas';
                               setState(() {
                                 if (columnIndex == _sortColumnIndex) {
-                                  _sortAsc = _sortNameAsc = sortAscending;
+                                  _sortAsc = _sortKelasAsc = sortAscending;
                                 } else {
                                   _sortColumnIndex = columnIndex;
-                                  _sortAsc = _sortNameAsc;
+                                  _sortAsc = _sortKelasAsc;
                                 }
                               });
                             },

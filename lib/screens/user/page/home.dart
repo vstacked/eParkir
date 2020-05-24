@@ -1,9 +1,11 @@
+import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/screens/user/page/showQr.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/widgets/user/home/type1/banner.dart';
 import 'package:eparkir/widgets/user/home/type1/quote.dart';
 import 'package:eparkir/widgets/user/home/type2/sudahScan.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   final String id;
@@ -19,6 +21,12 @@ class _HomeState extends State<Home> {
     setState(() {
       text = "15.40";
     });
+  }
+
+  void resetPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("value", 2);
+    preferences.setString("id", '');
   }
 
   _navigateAndDisplaySelection(BuildContext context) async {
@@ -45,6 +53,17 @@ class _HomeState extends State<Home> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Text("log out"),
+        onPressed: () {
+          resetPref();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Login()),
+            (Route<dynamic> route) => false,
+          );
+        },
+      ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(

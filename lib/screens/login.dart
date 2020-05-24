@@ -4,6 +4,7 @@ import 'package:eparkir/screens/admin/homeAdmin.dart';
 import 'package:eparkir/screens/user/homeUser.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -17,11 +18,15 @@ class _LoginState extends State<Login> {
   TextEditingController controller;
   bool isEnable = true;
 
-  void onSuccess(level, id) {
+  void onSuccess(level, id) async {
     _state = 2;
     controller.clear();
 
-    if (level == '1') {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("value", level);
+    preferences.setString("id", id);
+
+    if (level == 1) {
       pushAndRemoveUntil(HomeAdmin(
         id: id,
       ));
@@ -166,7 +171,7 @@ class _LoginState extends State<Login> {
 
   Future checkUser(String nis) async {
     final QuerySnapshot snapshot = await databaseReference
-        .collection("db")
+        .collection("siswa")
         .where('nis', isEqualTo: nis)
         .getDocuments();
     final List<DocumentSnapshot> list = snapshot.documents;
@@ -180,18 +185,17 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void sendData(nis) {
-    setState(() {
-      databaseReference
-          .collection('db')
-          .where('nis', isEqualTo: nis)
-          .snapshots()
-          .listen((data) => data.documents.forEach((doc) {
-                String id = doc.documentID;
-                String levelR = doc['level'];
+  void sendData(nis) async {
+    var test = await databaseReference
+        .collection('siswa')
+        .where('nis', isEqualTo: nis)
+        .getDocuments();
 
-                onSuccess(levelR, id);
-              }));
+    test.documents.forEach((f) {
+      print(f.data['nama']);
+      String id = f.documentID;
+      int level = f.data['level'];
+      onSuccess(level, id);
     });
   }
 }

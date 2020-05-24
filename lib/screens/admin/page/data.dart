@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Data extends StatefulWidget {
   @override
@@ -6,45 +9,110 @@ class Data extends StatefulWidget {
 }
 
 class _DataState extends State<Data> {
+  String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+  bool _sortNameAsc = true;
+  bool _sortNisAsc = true;
+  bool _sortKelasAsc = true;
+  bool _sortAsc = true;
+  int _sortColumnIndex;
+
+  String orderByValue;
+
+  String textSearch;
+
+  bool showSearch = false;
+  final TextEditingController tecSearch = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    tecSearch.clear();
+    setState(() {
+      textSearch = "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            child: Text("Data Siswa :"),
+          ),
+          Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("Data Siswa :"),
-                GestureDetector(
-                  child: Container(
+                (showSearch == false)
+                    ? IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => print('pressed'),
+                      )
+                    : Container(),
+                Flexible(
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 500),
+                    width: (showSearch == false) ? width / 4 : width,
+                    height: 50,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.blue, width: 1.5),
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Row(
                       children: <Widget>[
-                        Container(
-                          height: 30,
-                          margin: EdgeInsets.only(right: 5),
-                          child: Icon(Icons.arrow_left),
-                        ),
-                        Icon(
-                          Icons.search,
-                          color: Colors.red,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 3, right: 3),
+                        GestureDetector(
                           child: Container(
-                            height: 18,
-                            width: 1.5,
-                            color: Colors.grey,
+                            color: Colors.red,
+                            height: 50,
+                            width: 50,
+                            margin: EdgeInsets.only(right: 5),
+                            child: (showSearch == false)
+                                ? Icon(Icons.arrow_left)
+                                : Icon(Icons.arrow_right),
                           ),
+                          onTap: () {
+                            setState(() {
+                              showSearch = !showSearch;
+                            });
+                          },
                         ),
-                        Icon(Icons.list)
+                        SizedBox(
+                          width: 5,
+                        ),
+                        (showSearch == false)
+                            ? Icon(Icons.search)
+                            : Flexible(
+                                child: TextField(
+                                  controller: tecSearch,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      textSearch = val;
+                                    });
+                                  },
+                                  decoration: new InputDecoration(
+                                      prefixIcon: Icon(Icons.search),
+                                      hintText: 'Search...',
+                                      suffixIcon: (textSearch != '')
+                                          ? IconButton(
+                                              icon: Icon(Icons.close),
+                                              onPressed: () {
+                                                tecSearch.clear();
+                                                setState(() {
+                                                  textSearch = "";
+                                                });
+                                              },
+                                            )
+                                          : null),
+                                ),
+                              )
                       ],
                     ),
                   ),
@@ -58,36 +126,92 @@ class _DataState extends State<Data> {
               height: height,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: DataTable(
-                  sortColumnIndex: 0,
-                  horizontalMargin: 10,
-                  headingRowHeight: 40,
-                  columnSpacing: 10,
-                  sortAscending: true,
-                  columns: <DataColumn>[
-                    DataColumn(
-                      label: Text("No."),
-                    ),
-                    DataColumn(label: Text("NIS")),
-                    DataColumn(label: Text("Nama")),
-                    DataColumn(label: Text("Kelas")),
-                  ],
-                  rows: <DataRow>[
-                    dataRow(1, 17006912,
-                        'akasdsadasdsadsasdsadasdasdsadsadsadsau', 'XII RPL A'),
-                    dataRow(2, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006112, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII RPL A'),
-                    dataRow(1, 17006912, 'aku', 'XII TITL A'),
-                  ],
+                child: StreamBuilder(
+                  stream: (textSearch != '')
+                      ? databaseReference
+                          .collection('siswa')
+                          .where('level', isEqualTo: 0)
+                          .where('nisSearch', arrayContains: textSearch)
+                          .snapshots()
+                      : (orderByValue != null)
+                          ? databaseReference
+                              .collection('siswa')
+                              .where('level', isEqualTo: 0)
+                              .orderBy(orderByValue, descending: !_sortAsc)
+                              .snapshots()
+                          : databaseReference
+                              .collection('siswa')
+                              .where('level', isEqualTo: 0)
+                              .orderBy('nis')
+                              .snapshots(),
+                  builder: (context, snapshot) {
+                    int no = 1;
+                    QuerySnapshot data = snapshot.data;
+                    List<DocumentSnapshot> documentSnapshot =
+                        (data?.documents != null) ? data.documents : [];
+                    return DataTable(
+                      horizontalMargin: 10,
+                      headingRowHeight: 40,
+                      columnSpacing: 10,
+                      sortColumnIndex: _sortColumnIndex,
+                      sortAscending: _sortAsc,
+                      columns: <DataColumn>[
+                        DataColumn(
+                          label: Text("No."),
+                        ),
+                        DataColumn(
+                          label: Text("NIS"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'nis';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortNisAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortNisAsc;
+                              }
+                            });
+                          },
+                        ),
+                        DataColumn(
+                          label: Text("Nama"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'nama';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortNameAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortNameAsc;
+                              }
+                            });
+                          },
+                        ),
+                        DataColumn(
+                          label: Text("Kelas"),
+                          onSort: (columnIndex, sortAscending) {
+                            print(sortAscending);
+                            orderByValue = 'kelas';
+                            setState(() {
+                              if (columnIndex == _sortColumnIndex) {
+                                _sortAsc = _sortKelasAsc = sortAscending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _sortAsc = _sortKelasAsc;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                      rows: [
+                        for (var d in documentSnapshot)
+                          dataRow(
+                              no++, d['nis'], d['nama'], d['kelas'], context)
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -97,23 +221,22 @@ class _DataState extends State<Data> {
     );
   }
 
-  DataRow dataRow(int no, int nis, nama, kelas) {
+  DataRow dataRow(int no, String nis, nama, kelas, context) {
     return DataRow(
       cells: <DataCell>[
         DataCell(
           Text(
             no.toString(),
           ),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 60),
               child: Text(
-                nis.toString(),
+                nis,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
@@ -122,7 +245,7 @@ class _DataState extends State<Data> {
                 nama,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context),
         ),
         DataCell(
           ConstrainedBox(
@@ -131,7 +254,7 @@ class _DataState extends State<Data> {
                 kelas,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis.toString(), nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context),
         ),
       ],
     );

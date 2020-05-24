@@ -13,21 +13,67 @@ class _ShowAllState extends State<ShowAll> {
   String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
   bool _sortNameAsc = true;
+  bool _sortNisAsc = true;
+  bool _sortKelasAsc = true;
   bool _sortAsc = true;
   int _sortColumnIndex;
 
   String orderByValue;
+
+  Icon searchIcon = new Icon(Icons.search);
+  Widget appBarTitle = new Text("Daftar Hadir Hari ini");
+
+  String textSearch;
+  final TextEditingController tecSearch = new TextEditingController();
+
+  void searchPressed() {
+    setState(() {
+      if (this.searchIcon.icon == Icons.search) {
+        this.searchIcon = new Icon(Icons.close);
+        this.appBarTitle = new TextField(
+          controller: tecSearch,
+          onChanged: (val) {
+            setState(() {
+              textSearch = val;
+            });
+          },
+          decoration: new InputDecoration(
+            prefixIcon: Icon(Icons.search),
+            hintText: 'Search...',
+          ),
+        );
+      } else {
+        this.searchIcon = new Icon(Icons.search);
+        this.appBarTitle = new Text('Daftar Hadir Hari ini');
+        tecSearch.clear();
+        setState(() {
+          textSearch = "";
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    tecSearch.clear();
+    setState(() {
+      textSearch = "";
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Daftar Hadir Hari ini"),
+        title: appBarTitle,
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
-              child: Icon(Icons.search),
+              child: searchIcon,
+              onTap: () => searchPressed(),
             ),
           )
         ],
@@ -37,7 +83,29 @@ class _ShowAllState extends State<ShowAll> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text("Urutkan berdasarkan :"),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Urutkan berdasarkan :"),
+                GestureDetector(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue, width: 1.5),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Reset")),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      orderByValue = null;
+                      _sortColumnIndex = null;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
           Flexible(
             child: Container(
@@ -46,18 +114,26 @@ class _ShowAllState extends State<ShowAll> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: StreamBuilder(
-                  stream: (orderByValue != null)
+                  stream: (textSearch != '')
                       ? databaseReference
                           .collection('database')
                           .document('tanggal')
                           .collection(datePick)
-                          .orderBy(orderByValue, descending: !_sortAsc)
+                          .where('nisSearch', arrayContains: textSearch)
                           .snapshots()
-                      : databaseReference
-                          .collection('database')
-                          .document('tanggal')
-                          .collection(datePick)
-                          .snapshots(),
+                      : (orderByValue != null)
+                          ? databaseReference
+                              .collection('database')
+                              .document('tanggal')
+                              .collection(datePick)
+                              .orderBy(orderByValue, descending: !_sortAsc)
+                              .snapshots()
+                          : databaseReference
+                              .collection('database')
+                              .document('tanggal')
+                              .collection(datePick)
+                              .orderBy('datang')
+                              .snapshots(),
                   builder: (context, snapshot) {
                     int no = 1;
                     QuerySnapshot data = snapshot.data;
@@ -81,10 +157,10 @@ class _ShowAllState extends State<ShowAll> {
                             orderByValue = 'nis';
                             setState(() {
                               if (columnIndex == _sortColumnIndex) {
-                                _sortAsc = _sortNameAsc = sortAscending;
+                                _sortAsc = _sortNisAsc = sortAscending;
                               } else {
                                 _sortColumnIndex = columnIndex;
-                                _sortAsc = _sortNameAsc;
+                                _sortAsc = _sortNisAsc;
                               }
                             });
                           },
@@ -111,10 +187,10 @@ class _ShowAllState extends State<ShowAll> {
                             orderByValue = 'kelas';
                             setState(() {
                               if (columnIndex == _sortColumnIndex) {
-                                _sortAsc = _sortNameAsc = sortAscending;
+                                _sortAsc = _sortKelasAsc = sortAscending;
                               } else {
                                 _sortColumnIndex = columnIndex;
-                                _sortAsc = _sortNameAsc;
+                                _sortAsc = _sortKelasAsc;
                               }
                             });
                           },
