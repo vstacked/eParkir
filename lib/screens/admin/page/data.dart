@@ -23,6 +23,7 @@ class _DataState extends State<Data> {
 
   bool showSearch = false;
   final TextEditingController tecSearch = new TextEditingController();
+  FocusNode searchNode = FocusNode();
 
   @override
   void initState() {
@@ -31,6 +32,63 @@ class _DataState extends State<Data> {
     setState(() {
       textSearch = "";
     });
+  }
+
+  Future addDataToFirestore(nis, nama, kelas) async {
+    var test2 = await databaseReference
+        .collection('siswa')
+        .where('nis', isEqualTo: nis)
+        .getDocuments();
+
+    if (test2.documents.length == 0) {
+      DocumentReference documentReference =
+          await databaseReference.collection('siswa').add({
+        'nama': nama,
+        'nis': nis,
+        'kelas': kelas,
+        'level': 0,
+        'hadir': false,
+        'nisSearch': setSearchParam(nis),
+      });
+      return documentReference;
+    } else {
+      Scaffold.of(context).showSnackBar(snackbar);
+    }
+  }
+
+  void editDataToFirestore(nis, nama, kelas, id) async {
+    return Firestore.instance.collection('siswa').document(id).updateData({
+      'nama': nama,
+      'nis': nis,
+      'kelas': kelas,
+      'nisSearch': setSearchParam(nis),
+    });
+  }
+
+  void hapusDataToFirestore(id) async {
+    return Firestore.instance.collection('siswa').document(id).delete();
+  }
+
+  final snackbar = SnackBar(
+    content: Text("NIS Sudah Ada"),
+    backgroundColor: Colors.red,
+    action: SnackBarAction(
+      label: "Undo",
+      textColor: Colors.black,
+      onPressed: () {
+        print('Pressed');
+      },
+    ),
+  );
+
+  setSearchParam(String caseNumber) {
+    List<String> caseSearchList = List();
+    String temp = "";
+    for (int i = 0; i < caseNumber.length; i++) {
+      temp = temp + caseNumber[i];
+      caseSearchList.add(temp);
+    }
+    return caseSearchList;
   }
 
   @override
@@ -42,25 +100,30 @@ class _DataState extends State<Data> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-            child: Text("Data Siswa :"),
-          ),
-          Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 (showSearch == false)
-                    ? IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => print('pressed'),
+                    ? Container(
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(30)),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                          ),
+                          tooltip: 'Add Data',
+                          onPressed: () => addData(height),
+                        ),
                       )
                     : Container(),
+                (showSearch == false) ? Text("Data Siswa") : Container(),
                 Flexible(
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 500),
-                    width: (showSearch == false) ? width / 4 : width,
+                    width: (showSearch == false) ? width / 5 : width,
                     height: 50,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.blue, width: 1.5),
@@ -70,18 +133,26 @@ class _DataState extends State<Data> {
                       children: <Widget>[
                         GestureDetector(
                           child: Container(
-                            color: Colors.red,
+                            color: Colors.blue,
                             height: 50,
-                            width: 50,
+                            width: (showSearch == false) ? 30 : 50,
                             margin: EdgeInsets.only(right: 5),
                             child: (showSearch == false)
-                                ? Icon(Icons.arrow_left)
-                                : Icon(Icons.arrow_right),
+                                ? Icon(
+                                    Icons.arrow_left,
+                                    color: Colors.white,
+                                  )
+                                : Icon(
+                                    Icons.arrow_right,
+                                    color: Colors.white,
+                                  ),
                           ),
                           onTap: () {
                             setState(() {
                               showSearch = !showSearch;
+                              textSearch = "";
                             });
+                            tecSearch.clear();
                           },
                         ),
                         SizedBox(
@@ -92,6 +163,7 @@ class _DataState extends State<Data> {
                             : Flexible(
                                 child: TextField(
                                   controller: tecSearch,
+                                  focusNode: searchNode,
                                   onChanged: (val) {
                                     setState(() {
                                       textSearch = val;
@@ -104,9 +176,15 @@ class _DataState extends State<Data> {
                                           ? IconButton(
                                               icon: Icon(Icons.close),
                                               onPressed: () {
-                                                tecSearch.clear();
                                                 setState(() {
                                                   textSearch = "";
+                                                });
+
+                                                Future.delayed(Duration(
+                                                        milliseconds: 50))
+                                                    .then((_) {
+                                                  tecSearch.clear();
+                                                  searchNode.unfocus();
                                                 });
                                               },
                                             )
@@ -116,6 +194,32 @@ class _DataState extends State<Data> {
                       ],
                     ),
                   ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Urutkan berdasarkan :"),
+                GestureDetector(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue, width: 1.5),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Reset")),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      orderByValue = null;
+                      _sortColumnIndex = null;
+                    });
+                  },
                 ),
               ],
             ),
@@ -207,8 +311,8 @@ class _DataState extends State<Data> {
                       ],
                       rows: [
                         for (var d in documentSnapshot)
-                          dataRow(
-                              no++, d['nis'], d['nama'], d['kelas'], context)
+                          dataRow(no++, d['nis'], d['nama'], d['kelas'],
+                              context, d.documentID)
                       ],
                     );
                   },
@@ -221,13 +325,14 @@ class _DataState extends State<Data> {
     );
   }
 
-  DataRow dataRow(int no, String nis, nama, kelas, context) {
+  DataRow dataRow(int no, String nis, nama, kelas, context, idUser) {
     return DataRow(
       cells: <DataCell>[
         DataCell(
           Text(
             no.toString(),
           ),
+          onTap: () => tapped(nis, nama, kelas, context, idUser),
         ),
         DataCell(
           ConstrainedBox(
@@ -236,7 +341,7 @@ class _DataState extends State<Data> {
                 nis,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context, idUser),
         ),
         DataCell(
           ConstrainedBox(
@@ -245,7 +350,7 @@ class _DataState extends State<Data> {
                 nama,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context, idUser),
         ),
         DataCell(
           ConstrainedBox(
@@ -254,13 +359,13 @@ class _DataState extends State<Data> {
                 kelas,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context),
+          onTap: () => tapped(nis, nama, kelas, context, idUser),
         ),
       ],
     );
   }
 
-  void tapped(nis, nama, kelas, context) {
+  void tapped(nis, nama, kelas, context, idUser) {
     final height = MediaQuery.of(context).size.height;
     showDialog(
         context: context,
@@ -282,13 +387,13 @@ class _DataState extends State<Data> {
               FlatButton(
                 color: Colors.red,
                 child: Text("Hapus"),
-                onPressed: () {},
+                onPressed: () => hapusData(idUser),
               ),
               FlatButton(
                 color: Colors.blue,
                 child: Text("Ubah"),
                 onPressed: () {
-                  editData(nis, nama, kelas, height);
+                  editData(nis, nama, kelas, height, idUser);
                 },
               ),
             ],
@@ -296,7 +401,36 @@ class _DataState extends State<Data> {
         });
   }
 
-  void editData(nis, nama, kelas, height) {
+  void hapusData(idUser) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Hapus Data"),
+            content: Text('Apakah Anda Yakin ?'),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.blue,
+                child: Text("Batal"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                color: Colors.green,
+                child: Text("Hapus"),
+                onPressed: () {
+                  hapusDataToFirestore(idUser);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  void editData(nis, nama, kelas, height, idUser) {
     TextEditingController controllerNis =
         TextEditingController(text: nis.toString());
     TextEditingController controllerNama = TextEditingController(text: nama);
@@ -330,6 +464,52 @@ class _DataState extends State<Data> {
                 color: Colors.green,
                 child: Text("Simpan"),
                 onPressed: () {
+                  editDataToFirestore(controllerNis.text, controllerNama.text,
+                      controllerKelas.text, idUser);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  void addData(height) {
+    TextEditingController controllerNis = TextEditingController();
+    TextEditingController controllerNama = TextEditingController();
+    TextEditingController controllerKelas = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Tambah Data"),
+            content: Container(
+              height: height / 3,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  TextField(
+                    maxLength: 8,
+                    keyboardType: TextInputType.number,
+                    controller: controllerNis,
+                  ),
+                  TextField(
+                    controller: controllerNama,
+                  ),
+                  TextField(
+                    controller: controllerKelas,
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.blue,
+                child: Text("Tambah"),
+                onPressed: () {
+                  addDataToFirestore(controllerNis.text, controllerNama.text,
+                      controllerKelas.text);
                   Navigator.pop(context);
                 },
               )

@@ -26,6 +26,7 @@ class _HistoryBodyState extends State<HistoryBody> {
 
   String textSearch;
   final TextEditingController tecSearch = new TextEditingController();
+  FocusNode searchNode = FocusNode();
 
   void _pickDateDialog() {
     showDatePicker(
@@ -109,6 +110,7 @@ class _HistoryBodyState extends State<HistoryBody> {
         ),
         TextField(
           controller: tecSearch,
+          focusNode: searchNode,
           onChanged: (val) {
             setState(() {
               textSearch = val;
@@ -121,9 +123,13 @@ class _HistoryBodyState extends State<HistoryBody> {
                   ? IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () {
-                        tecSearch.clear();
                         setState(() {
                           textSearch = "";
+                        });
+
+                        Future.delayed(Duration(milliseconds: 50)).then((_) {
+                          tecSearch.clear();
+                          searchNode.unfocus();
                         });
                       },
                     )
