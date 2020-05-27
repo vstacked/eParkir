@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Padding quote() {
+Padding quoteType1() {
   return Padding(
     padding: const EdgeInsets.only(top: 20.0, bottom: 30.0),
     child: Container(

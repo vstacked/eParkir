@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Padding sudahScan(height, width, int y) {
+Padding sudahScanType2(height, width, int y) {
   // 0 datang 1 pulang
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 40.0),

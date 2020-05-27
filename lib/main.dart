@@ -45,27 +45,25 @@ class _HomeState extends State<Home> {
     return MaterialApp(
       home: SafeArea(
         child: FutureBuilder<int>(
-          future: getPref(),
-          builder: (context, snapshot) {
-            if (snapshot.data == 1) {
-              return FutureBuilder(
+            future: getPref(),
+            builder: (context, snapshot) {
+              return FutureBuilder<String>(
                 future: getId(),
-                builder: (context, snap) => HomeAdmin(
-                  id: snap?.data,
-                ),
+                builder: (context, snap) {
+                  if (snapshot.data == 1) {
+                    return HomeAdmin(
+                      id: snap?.data,
+                    );
+                  } else if (snapshot.data == 0) {
+                    return HomeUser(
+                      id: snap?.data,
+                    );
+                  } else {
+                    return Login();
+                  }
+                },
               );
-            } else if (snapshot.data == 0) {
-              return FutureBuilder(
-                future: getId(),
-                builder: (context, snap) => HomeUser(
-                  id: snap?.data,
-                ),
-              );
-            } else {
-              return Login();
-            }
-          },
-        ),
+            }),
       ),
     );
   }

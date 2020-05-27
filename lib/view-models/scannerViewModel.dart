@@ -33,41 +33,6 @@ class ScannerViewModel extends BaseViewModel {
     _controller.dispose();
   }
 
-  final snackbar = SnackBar(
-    content: Text("Sudah Absen dongg"),
-    backgroundColor: Colors.red,
-    action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
-    ),
-  );
-  final snackbarSuccess = SnackBar(
-    content: Text("Success"),
-    backgroundColor: Colors.green,
-    action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
-    ),
-  );
-
-  final snackbarPulang = SnackBar(
-    content: Text("dah pulangg"),
-    backgroundColor: Colors.blue,
-    action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
-    ),
-  );
-
   void onQRViewCreated(QRViewController _controller) {
     this._controller = _controller;
     _controller.scannedDataStream.listen((scanData) {
@@ -132,20 +97,14 @@ class ScannerViewModel extends BaseViewModel {
           .collection(dateNow)
           .document(idRes)
           .updateData({'pulang': timeNow}).whenComplete(() {
-        _scaffoldKey.currentState.showSnackBar(snackbarPulang);
+        _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarPulang);
 
         qrText = '';
         notifyListeners();
         controller?.resumeCamera();
       });
-      // Firestore.instance
-      //     .collection('siswa')
-      //     .document(idRes)
-      //     .updateData({'hadir': false}).whenComplete(() {
-
-      // });
     } else {
-      _scaffoldKey.currentState.showSnackBar(snackbar);
+      _scaffoldKey.currentState.showSnackBar(_snackbar.snackbar);
 
       qrText = '';
       notifyListeners();
@@ -175,7 +134,7 @@ class ScannerViewModel extends BaseViewModel {
         .collection('siswa')
         .document(idUser)
         .updateData({'hadir': true}).whenComplete(() {
-      _scaffoldKey.currentState.showSnackBar(snackbarSuccess);
+      _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarSuccess);
 
       qrText = '';
       notifyListeners();

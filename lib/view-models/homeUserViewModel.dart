@@ -24,17 +24,6 @@ class HomeUserViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void resetPref(String id) async {
-    Firestore.instance
-        .collection('siswa')
-        .document(id)
-        .updateData({'login': false});
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setInt("value", 2);
-    preferences.setString("id", '');
-    notifyListeners();
-  }
-
   _getTime() {
     String _timeNow = DateFormat('Hms').format(DateTime.now());
 

@@ -14,17 +14,6 @@ class HomeAdminViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void resetPref(String id) async {
-    Firestore.instance
-        .collection('siswa')
-        .document(id)
-        .updateData({'login': false});
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setInt("value", 2);
-    preferences.setString("id", '');
-    notifyListeners();
-  }
-
   void changeToFalse() async {
     var test2 = await databaseReference
         .collection('siswa')

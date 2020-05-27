@@ -83,6 +83,7 @@ class DataViewModel extends BaseViewModel {
       }
     }).then((_) {
       Navigator.pop(context);
+      Navigator.pop(context);
     });
   }
 
@@ -94,6 +95,7 @@ class DataViewModel extends BaseViewModel {
         return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
       }
     }).then((_) {
+      Navigator.pop(context);
       Navigator.pop(context);
     });
   }

@@ -12,4 +12,40 @@ class Snackbar {
       },
     ),
   );
+
+  final snackbar = SnackBar(
+    content: Text("Sudah Absen dongg"),
+    backgroundColor: Colors.red,
+    action: SnackBarAction(
+      label: "Undo",
+      textColor: Colors.black,
+      onPressed: () {
+        print('Pressed');
+      },
+    ),
+  );
+
+  final snackbarSuccess = SnackBar(
+    content: Text("Success"),
+    backgroundColor: Colors.green,
+    action: SnackBarAction(
+      label: "Undo",
+      textColor: Colors.black,
+      onPressed: () {
+        print('Pressed');
+      },
+    ),
+  );
+
+  final snackbarPulang = SnackBar(
+    content: Text("dah pulangg"),
+    backgroundColor: Colors.blue,
+    action: SnackBarAction(
+      label: "Undo",
+      textColor: Colors.black,
+      onPressed: () {
+        print('Pressed');
+      },
+    ),
+  );
 }

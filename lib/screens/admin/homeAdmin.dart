@@ -1,6 +1,5 @@
 import 'package:eparkir/screens/admin/page/data.dart';
 import 'package:eparkir/screens/admin/page/home.dart';
-
 import 'package:flutter/material.dart';
 
 class HomeAdmin extends StatefulWidget {

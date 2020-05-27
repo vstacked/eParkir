@@ -1,6 +1,6 @@
 import 'package:eparkir/view-models/scannerViewModel.dart';
+import 'package:eparkir/widgets/admin/buildSwitchScanner.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_switch/flutter_switch.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:stacked/stacked.dart';
 
@@ -78,112 +78,7 @@ class _BodyState extends State<Body> {
                 SizedBox(
                   height: 5.0,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          "Flash",
-                          style: TextStyle(fontSize: 12.0),
-                        ),
-                        SizedBox(
-                          height: 3.0,
-                        ),
-                        FlutterSwitch(
-                          height: 23.0,
-                          valueFontSize: 12.0,
-                          width: 60,
-                          showOnOff: true,
-                          activeTextColor: Colors.black,
-                          inactiveTextColor: Colors.blue[50],
-                          value: model.flashStatus,
-                          onToggle: (val) {
-                            if (model.controller != null) {
-                              model.controller.toggleFlash();
-                              if (val == true) {
-                                setState(() {
-                                  model.flashStatus = val;
-                                });
-                              } else {
-                                setState(() {
-                                  model.flashStatus = val;
-                                });
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          "Rotate Camera",
-                          style: TextStyle(fontSize: 12.0),
-                        ),
-                        SizedBox(
-                          height: 3.0,
-                        ),
-                        FlutterSwitch(
-                          height: 23.0,
-                          valueFontSize: 12.0,
-                          width: 60,
-                          showOnOff: true,
-                          activeTextColor: Colors.black,
-                          inactiveTextColor: Colors.blue[50],
-                          value: model.cameraStatus,
-                          onToggle: (val) {
-                            if (model.controller != null) {
-                              model.controller.flipCamera();
-                              if (val == true) {
-                                setState(() {
-                                  model.cameraStatus = val;
-                                });
-                              } else {
-                                setState(() {
-                                  model.cameraStatus = val;
-                                });
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          "Pause / Resume",
-                          style: TextStyle(fontSize: 12.0),
-                        ),
-                        SizedBox(
-                          height: 3.0,
-                        ),
-                        FlutterSwitch(
-                          height: 23.0,
-                          valueFontSize: 12.0,
-                          width: 60,
-                          showOnOff: true,
-                          activeTextColor: Colors.black,
-                          inactiveTextColor: Colors.blue[50],
-                          value: model.prStatus,
-                          onToggle: (val) {
-                            if (val == true) {
-                              setState(() {
-                                model.prStatus = val;
-                              });
-                              model.controller?.pauseCamera();
-                            } else {
-                              setState(() {
-                                model.prStatus = val;
-                              });
-                              model.controller?.resumeCamera();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                BuildSwitchScanner(model: model),
                 Container(
                   width: width,
                   height: height / 3.5,
