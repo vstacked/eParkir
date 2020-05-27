@@ -16,6 +16,7 @@ class _DataState extends State<Data> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: dataViewModel.scaffoldKey,
       body: ViewModelBuilder<DataViewModel>.reactive(
         viewModelBuilder: () => dataViewModel,
         onModelReady: (model) => model.initState(),

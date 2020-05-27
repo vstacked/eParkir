@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,11 @@ class HomeUserViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void resetPref() async {
+  void resetPref(String id) async {
+    Firestore.instance
+        .collection('siswa')
+        .document(id)
+        .updateData({'login': false});
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("value", 2);
     preferences.setString("id", '');

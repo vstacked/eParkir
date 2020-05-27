@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/screens/admin/homeAdmin.dart';
 import 'package:eparkir/screens/user/homeUser.dart';
+import 'package:eparkir/services/checkConnection.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,7 @@ class LoginViewModel extends BaseViewModel {
   final _key = new GlobalKey<FormState>();
   TextEditingController _controller;
   bool _isEnable = true;
+  CheckConnection checkConnection;
 
   get key => _key;
   get controller => _controller;
@@ -27,6 +29,7 @@ class LoginViewModel extends BaseViewModel {
     _controller = TextEditingController();
     _controller.clear();
     _nisFocus = FocusNode();
+    checkConnection = CheckConnection();
   }
 
   void dis() {
@@ -36,6 +39,11 @@ class LoginViewModel extends BaseViewModel {
   void onSuccess(level, id, context) async {
     state = 2;
     _controller.clear();
+
+    Firestore.instance
+        .collection('siswa')
+        .document(id)
+        .updateData({'login': true});
 
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("value", level);
@@ -90,16 +98,38 @@ class LoginViewModel extends BaseViewModel {
         break;
       case 2:
         afterClick();
-
         return Icon(Icons.check, color: Colors.blue);
         break;
       case 3:
         Timer(Duration(seconds: 2), () {
           afterClick();
         });
-
         return Text(
           "Data Tidak Ada",
+          style: const TextStyle(
+            color: Colors.blue,
+            fontSize: 16.0,
+          ),
+        );
+        break;
+      case 4:
+        Timer(Duration(seconds: 2), () {
+          afterClick();
+        });
+        return Text(
+          "No Internet Connection",
+          style: const TextStyle(
+            color: Colors.blue,
+            fontSize: 16.0,
+          ),
+        );
+        break;
+      case 5:
+        Timer(Duration(seconds: 2), () {
+          afterClick();
+        });
+        return Text(
+          "Sedang Login",
           style: const TextStyle(
             color: Colors.blue,
             fontSize: 16.0,
@@ -115,21 +145,29 @@ class LoginViewModel extends BaseViewModel {
     state = 0;
     _isEnable = true;
     _controller.clear();
+    notifyListeners();
   }
 
   Future checkUser(String nis, context) async {
-    final QuerySnapshot snapshot = await databaseReference
-        .collection("siswa")
-        .where('nis', isEqualTo: nis)
-        .getDocuments();
-    final List<DocumentSnapshot> list = snapshot.documents;
+    checkConnection.checkConnection().then((_) async {
+      if (checkConnection.hasConnection) {
+        final QuerySnapshot snapshot = await databaseReference
+            .collection("siswa")
+            .where('nis', isEqualTo: nis)
+            .getDocuments();
+        final List<DocumentSnapshot> list = snapshot.documents;
 
-    if (list.length == 0) {
-      state = 3;
-      notifyListeners();
-    } else {
-      sendData(nis, context);
-    }
+        if (list.length == 0) {
+          state = 3;
+          notifyListeners();
+        } else {
+          sendData(nis, context);
+        }
+      } else {
+        state = 4;
+        notifyListeners();
+      }
+    });
   }
 
   void sendData(nis, context) async {
@@ -142,7 +180,13 @@ class LoginViewModel extends BaseViewModel {
       print(f.data['nama']);
       String id = f.documentID;
       int level = f.data['level'];
-      onSuccess(level, id, context);
+      bool login = f.data['login'];
+      if (login == false) {
+        onSuccess(level, id, context);
+      } else {
+        state = 5;
+        notifyListeners();
+      }
     });
   }
 }

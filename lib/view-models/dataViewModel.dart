@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eparkir/services/checkConnection.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/widgets/common/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -17,54 +19,83 @@ class DataViewModel extends BaseViewModel {
   bool showSearch = false;
   TextEditingController _tecSearch;
   FocusNode _searchNode;
+  CheckConnection checkConnection;
+  Snackbar _snackbar = Snackbar();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   get tecClear => _tecSearch.clear();
   get tecSearch => _tecSearch;
   get searchNode => _searchNode;
   get searchUnfocus => _searchNode.unfocus();
+  get scaffoldKey => _scaffoldKey;
 
   void initState() {
     _tecSearch = new TextEditingController();
     _searchNode = FocusNode();
     _tecSearch.clear();
     textSearch = "";
+    checkConnection = CheckConnection();
     notifyListeners();
   }
 
-  Future addDataToFirestore(nis, nama, kelas, context) async {
-    var test2 = await databaseReference
-        .collection('siswa')
-        .where('nis', isEqualTo: nis)
-        .getDocuments();
+  void addDataToFirestore(nis, nama, kelas, context) async {
+    checkConnection.checkConnection().then((_) async {
+      if (checkConnection.hasConnection) {
+        var test2 = await databaseReference
+            .collection('siswa')
+            .where('nis', isEqualTo: nis)
+            .getDocuments();
 
-    if (test2.documents.length == 0) {
-      DocumentReference documentReference =
-          await databaseReference.collection('siswa').add({
-        'nama': nama,
-        'nis': nis,
-        'kelas': kelas,
-        'level': 0,
-        'hadir': false,
-        'nisSearch': setSearchParam(nis),
-      });
-      return documentReference;
-    } else {
-      Scaffold.of(context).showSnackBar(snackbar);
-    }
-    notifyListeners();
-  }
-
-  void editDataToFirestore(nis, nama, kelas, id) async {
-    return Firestore.instance.collection('siswa').document(id).updateData({
-      'nama': nama,
-      'nis': nis,
-      'kelas': kelas,
-      'nisSearch': setSearchParam(nis),
+        if (test2.documents.length == 0) {
+          DocumentReference documentReference =
+              await databaseReference.collection('siswa').add({
+            'nama': nama,
+            'nis': nis,
+            'kelas': kelas,
+            'level': 0,
+            'hadir': false,
+            'login': false,
+            'nisSearch': setSearchParam(nis),
+          });
+          return documentReference;
+        } else {
+          return _scaffoldKey.currentState.showSnackBar(snackbar);
+        }
+      } else {
+        return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
+      }
+    }).then((_) {
+      Navigator.pop(context);
     });
   }
 
-  void hapusDataToFirestore(id) async {
-    return Firestore.instance.collection('siswa').document(id).delete();
+  void editDataToFirestore(nis, nama, kelas, id, context) async {
+    checkConnection.checkConnection().then((_) {
+      if (checkConnection.hasConnection) {
+        return Firestore.instance.collection('siswa').document(id).updateData({
+          'nama': nama,
+          'nis': nis,
+          'kelas': kelas,
+          'nisSearch': setSearchParam(nis),
+        });
+      } else {
+        return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
+      }
+    }).then((_) {
+      Navigator.pop(context);
+    });
+  }
+
+  void hapusDataToFirestore(id, context) async {
+    checkConnection.checkConnection().then((_) {
+      if (checkConnection.hasConnection) {
+        return Firestore.instance.collection('siswa').document(id).delete();
+      } else {
+        return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
+      }
+    }).then((_) {
+      Navigator.pop(context);
+    });
   }
 
   final snackbar = SnackBar(
@@ -144,9 +175,7 @@ class DataViewModel extends BaseViewModel {
                 color: Colors.green,
                 child: Text("Hapus"),
                 onPressed: () {
-                  hapusDataToFirestore(idUser);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  hapusDataToFirestore(idUser, context);
                 },
               )
             ],
@@ -189,9 +218,7 @@ class DataViewModel extends BaseViewModel {
                 child: Text("Simpan"),
                 onPressed: () {
                   editDataToFirestore(controllerNis.text, controllerNama.text,
-                      controllerKelas.text, idUser);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                      controllerKelas.text, idUser, context);
                 },
               )
             ],
@@ -234,7 +261,6 @@ class DataViewModel extends BaseViewModel {
                 onPressed: () {
                   addDataToFirestore(controllerNis.text, controllerNama.text,
                       controllerKelas.text, context);
-                  Navigator.pop(context);
                 },
               )
             ],

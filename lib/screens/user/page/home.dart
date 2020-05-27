@@ -80,7 +80,7 @@ class _HomeState extends State<Home> {
         ],
       ),
       onTap: () {
-        model.resetPref();
+        model.resetPref(widget.id);
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => Login()),
