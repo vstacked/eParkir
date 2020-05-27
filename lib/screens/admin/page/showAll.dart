@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/view-models/showAllViewModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:stacked/stacked.dart';
 
 class ShowAll extends StatefulWidget {
   @override
@@ -10,209 +11,171 @@ class ShowAll extends StatefulWidget {
 }
 
 class _ShowAllState extends State<ShowAll> {
-  String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
-
-  bool _sortNameAsc = true;
-  bool _sortNisAsc = true;
-  bool _sortKelasAsc = true;
-  bool _sortAsc = true;
-  int _sortColumnIndex;
-
-  String orderByValue;
-
-  Icon searchIcon = new Icon(Icons.search);
-  Widget appBarTitle = new Text("Daftar Hadir Hari ini");
-
-  String textSearch;
-  final TextEditingController tecSearch = new TextEditingController();
-
-  void searchPressed() {
-    setState(() {
-      if (this.searchIcon.icon == Icons.search) {
-        this.searchIcon = new Icon(Icons.close);
-        this.appBarTitle = new TextField(
-          controller: tecSearch,
-          onChanged: (val) {
-            setState(() {
-              textSearch = val;
-            });
-          },
-          decoration: new InputDecoration(
-            prefixIcon: Icon(Icons.search),
-            hintText: 'Search...',
-          ),
-        );
-      } else {
-        this.searchIcon = new Icon(Icons.search);
-        this.appBarTitle = new Text('Daftar Hadir Hari ini');
-        tecSearch.clear();
-        setState(() {
-          textSearch = "";
-        });
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    tecSearch.clear();
-    setState(() {
-      textSearch = "";
-    });
-    super.initState();
-  }
+  ShowAllViewModel showAllViewModel = ShowAllViewModel();
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        title: appBarTitle,
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              child: searchIcon,
-              onTap: () => searchPressed(),
-            ),
-          )
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text("Urutkan berdasarkan :"),
-                GestureDetector(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue, width: 1.5),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("Reset")),
-                  ),
-                  onTap: () {
-                    setState(() {
-                      orderByValue = null;
-                      _sortColumnIndex = null;
-                    });
-                  },
+    return ViewModelBuilder<ShowAllViewModel>.reactive(
+      viewModelBuilder: () => showAllViewModel,
+      onModelReady: (model) => model.initState(),
+      builder: (context, model, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: model.appBarTitle,
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  child: model.searchIcon,
+                  onTap: () => model.searchPressed(),
                 ),
-              ],
-            ),
+              )
+            ],
           ),
-          Flexible(
-            child: Container(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: StreamBuilder(
-                  stream: (textSearch != '')
-                      ? databaseReference
-                          .collection('database')
-                          .document('tanggal')
-                          .collection(datePick)
-                          .where('nisSearch', arrayContains: textSearch)
-                          .snapshots()
-                      : (orderByValue != null)
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("Urutkan berdasarkan :"),
+                    GestureDetector(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blue, width: 1.5),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("Reset")),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          model.orderByValue = null;
+                          model.sortColumnIndex = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  width: double.infinity,
+                  height: height,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: StreamBuilder(
+                      stream: (model.textSearch != '')
                           ? databaseReference
                               .collection('database')
                               .document('tanggal')
-                              .collection(datePick)
-                              .orderBy(orderByValue, descending: !_sortAsc)
+                              .collection(model.datePick)
+                              .where('nisSearch',
+                                  arrayContains: model.textSearch)
                               .snapshots()
-                          : databaseReference
-                              .collection('database')
-                              .document('tanggal')
-                              .collection(datePick)
-                              .orderBy('datang')
-                              .snapshots(),
-                  builder: (context, snapshot) {
-                    int no = 1;
-                    QuerySnapshot data = snapshot.data;
-                    List<DocumentSnapshot> documentSnapshot =
-                        (data?.documents != null) ? data.documents : [];
+                          : (model.orderByValue != null)
+                              ? databaseReference
+                                  .collection('database')
+                                  .document('tanggal')
+                                  .collection(model.datePick)
+                                  .orderBy(model.orderByValue,
+                                      descending: !model.sortAsc)
+                                  .snapshots()
+                              : databaseReference
+                                  .collection('database')
+                                  .document('tanggal')
+                                  .collection(model.datePick)
+                                  .orderBy('datang')
+                                  .snapshots(),
+                      builder: (context, snapshot) {
+                        int no = 1;
+                        QuerySnapshot data = snapshot.data;
+                        List<DocumentSnapshot> documentSnapshot =
+                            (data?.documents != null) ? data.documents : [];
 
-                    return DataTable(
-                      horizontalMargin: 10,
-                      headingRowHeight: 40,
-                      columnSpacing: 10,
-                      sortColumnIndex: _sortColumnIndex,
-                      sortAscending: _sortAsc,
-                      columns: <DataColumn>[
-                        DataColumn(
-                          label: Text("No."),
-                        ),
-                        DataColumn(
-                          label: Text("NIS"),
-                          onSort: (columnIndex, sortAscending) {
-                            print(sortAscending);
-                            orderByValue = 'nis';
-                            setState(() {
-                              if (columnIndex == _sortColumnIndex) {
-                                _sortAsc = _sortNisAsc = sortAscending;
-                              } else {
-                                _sortColumnIndex = columnIndex;
-                                _sortAsc = _sortNisAsc;
-                              }
-                            });
-                          },
-                        ),
-                        DataColumn(
-                          label: Text("Nama"),
-                          onSort: (columnIndex, sortAscending) {
-                            print(sortAscending);
-                            orderByValue = 'nama';
-                            setState(() {
-                              if (columnIndex == _sortColumnIndex) {
-                                _sortAsc = _sortNameAsc = sortAscending;
-                              } else {
-                                _sortColumnIndex = columnIndex;
-                                _sortAsc = _sortNameAsc;
-                              }
-                            });
-                          },
-                        ),
-                        DataColumn(
-                          label: Text("Kelas"),
-                          onSort: (columnIndex, sortAscending) {
-                            print(sortAscending);
-                            orderByValue = 'kelas';
-                            setState(() {
-                              if (columnIndex == _sortColumnIndex) {
-                                _sortAsc = _sortKelasAsc = sortAscending;
-                              } else {
-                                _sortColumnIndex = columnIndex;
-                                _sortAsc = _sortKelasAsc;
-                              }
-                            });
-                          },
-                        ),
-                      ],
-                      rows: [
-                        for (var d in documentSnapshot)
-                          dataRow(
-                              no++, d['nis'], d['nama'], d['kelas'], context, d)
-                      ],
-                    );
-                  },
+                        return DataTable(
+                          horizontalMargin: 10,
+                          headingRowHeight: 40,
+                          columnSpacing: 10,
+                          sortColumnIndex: model.sortColumnIndex,
+                          sortAscending: model.sortAsc,
+                          columns: <DataColumn>[
+                            DataColumn(
+                              label: Text("No."),
+                            ),
+                            DataColumn(
+                              label: Text("NIS"),
+                              onSort: (columnIndex, sortAscending) {
+                                print(sortAscending);
+                                model.orderByValue = 'nis';
+                                setState(() {
+                                  if (columnIndex == model.sortColumnIndex) {
+                                    model.sortAsc =
+                                        model.sortNisAsc = sortAscending;
+                                  } else {
+                                    model.sortColumnIndex = columnIndex;
+                                    model.sortAsc = model.sortNisAsc;
+                                  }
+                                });
+                              },
+                            ),
+                            DataColumn(
+                              label: Text("Nama"),
+                              onSort: (columnIndex, sortAscending) {
+                                print(sortAscending);
+                                model.orderByValue = 'nama';
+                                setState(() {
+                                  if (columnIndex == model.sortColumnIndex) {
+                                    model.sortAsc =
+                                        model.sortNameAsc = sortAscending;
+                                  } else {
+                                    model.sortColumnIndex = columnIndex;
+                                    model.sortAsc = model.sortNameAsc;
+                                  }
+                                });
+                              },
+                            ),
+                            DataColumn(
+                              label: Text("Kelas"),
+                              onSort: (columnIndex, sortAscending) {
+                                print(sortAscending);
+                                model.orderByValue = 'kelas';
+                                setState(() {
+                                  if (columnIndex == model.sortColumnIndex) {
+                                    model.sortAsc =
+                                        model.sortKelasAsc = sortAscending;
+                                  } else {
+                                    model.sortColumnIndex = columnIndex;
+                                    model.sortAsc = model.sortKelasAsc;
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                          rows: [
+                            for (var d in documentSnapshot)
+                              dataRow(no++, d['nis'], d['nama'], d['kelas'],
+                                  context, d, model)
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          )
-        ],
-      ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 
-  DataRow dataRow(int no, String nis, nama, kelas, context, dyn) {
+  DataRow dataRow(
+      int no, String nis, nama, kelas, context, dyn, ShowAllViewModel model) {
     return DataRow(
       cells: <DataCell>[
         DataCell(
@@ -227,7 +190,7 @@ class _ShowAllState extends State<ShowAll> {
                 nis,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context, dyn),
+          onTap: () => model.tapped(nis, nama, kelas, context, dyn),
         ),
         DataCell(
           ConstrainedBox(
@@ -236,7 +199,7 @@ class _ShowAllState extends State<ShowAll> {
                 nama,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context, dyn),
+          onTap: () => model.tapped(nis, nama, kelas, context, dyn),
         ),
         DataCell(
           ConstrainedBox(
@@ -245,41 +208,9 @@ class _ShowAllState extends State<ShowAll> {
                 kelas,
                 overflow: TextOverflow.ellipsis,
               )),
-          onTap: () => tapped(nis, nama, kelas, context, dyn),
+          onTap: () => model.tapped(nis, nama, kelas, context, dyn),
         ),
       ],
     );
-  }
-
-  void tapped(nis, nama, kelas, context, dyn) {
-    final height = MediaQuery.of(context).size.height;
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Detail Data Siswa'),
-            content: Container(
-              height: height / 5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(nis.toString()),
-                  Text(nama),
-                  Text(kelas),
-                  Text("datang ${dyn['datang']}"),
-                  Text("pulang ${dyn['pulang']}"),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                  color: Colors.blue,
-                  child: Text("Close"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-            ],
-          );
-        });
   }
 }

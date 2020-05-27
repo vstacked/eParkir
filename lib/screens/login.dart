@@ -1,10 +1,6 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/screens/admin/homeAdmin.dart';
-import 'package:eparkir/screens/user/homeUser.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/view-models/loginViewModel.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stacked/stacked.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -12,100 +8,11 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  int _state = 0;
-  FocusNode nisFocus = FocusNode();
-  final _key = new GlobalKey<FormState>();
-  TextEditingController controller;
-  bool isEnable = true;
-
-  void onSuccess(level, id) async {
-    _state = 2;
-    controller.clear();
-
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setInt("value", level);
-    preferences.setString("id", id);
-
-    if (level == 1) {
-      pushAndRemoveUntil(HomeAdmin(
-        id: id,
-      ));
-    } else {
-      pushAndRemoveUntil(HomeUser(
-        id: id,
-      ));
-    }
-  }
-
-  Future pushAndRemoveUntil(Widget to) {
-    return Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => to),
-      (Route<dynamic> route) => false,
-    );
-  }
-
-  Widget setUpButtonChild() {
-    switch (_state) {
-      case 0:
-        return new Text(
-          "Login",
-          style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
-        );
-        break;
-      case 1:
-        isEnable = false;
-        return Container(
-          height: 20,
-          width: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 3.0,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-          ),
-        );
-        break;
-      case 2:
-        afterClick();
-        return Icon(Icons.check, color: Colors.blue);
-        break;
-      case 3:
-        Timer(Duration(seconds: 2), () {
-          afterClick();
-        });
-        return Text(
-          "Data Tidak Ada",
-          style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
-        );
-        break;
-      default:
-        return Container();
-    }
-  }
-
-  afterClick() {
-    setState(() {
-      _state = 0;
-      isEnable = true;
-      controller.clear();
-    });
-  }
-
-  @override
-  void initState() {
-    controller = TextEditingController();
-    controller.clear();
-    super.initState();
-  }
+  final LoginViewModel loginViewModel = LoginViewModel();
 
   @override
   void dispose() {
-    controller.dispose();
+    loginViewModel.dispose();
     super.dispose();
   }
 
@@ -113,16 +20,23 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Center(
-        child: Form(
-          key: _key,
-          child: buildLogin(width),
-        ),
+      body: ViewModelBuilder<LoginViewModel>.reactive(
+        viewModelBuilder: () => loginViewModel,
+        onModelReady: (model) => model.initState(),
+        disposeViewModel: false,
+        builder: (context, model, child) {
+          return Center(
+            child: Form(
+              key: model.key,
+              child: buildLogin(width, model),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Column buildLogin(double width) {
+  Column buildLogin(double width, LoginViewModel model) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -130,19 +44,19 @@ class _LoginState extends State<Login> {
         Container(
           width: width / 1.5,
           child: TextFormField(
-            controller: controller,
+            controller: model.controller,
             keyboardType: TextInputType.number,
             maxLength: 8,
-            focusNode: nisFocus,
+            focusNode: model.nisFocus,
             validator: (e) {
               return (e.isEmpty) ? "Please Insert NIS" : null;
             },
-            enabled: isEnable,
+            enabled: model.isEnable,
             onFieldSubmitted: (value) {
-              if (_state == 0) {
-                _state = 1;
-                checkUser(controller.text);
-                nisFocus.unfocus();
+              if (model.state == 0) {
+                model.state = 1;
+                model.checkUser(model.controllerText, model);
+                model.nisUnfocus;
               }
             },
             decoration: InputDecoration(
@@ -153,13 +67,13 @@ class _LoginState extends State<Login> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
               side: BorderSide(color: Colors.blue)),
-          child: setUpButtonChild(),
+          child: model.setUpButtonChild(),
           onPressed: () {
             setState(() {
-              if (_key.currentState.validate()) if (_state == 0) {
-                _state = 1;
-                checkUser(controller.text);
-                nisFocus.unfocus();
+              if (model.validate) if (model.state == 0) {
+                model.state = 1;
+                model.checkUser(model.controllerText, context);
+                model.nisUnfocus;
               }
             });
           },
@@ -167,35 +81,5 @@ class _LoginState extends State<Login> {
         ),
       ],
     );
-  }
-
-  Future checkUser(String nis) async {
-    final QuerySnapshot snapshot = await databaseReference
-        .collection("siswa")
-        .where('nis', isEqualTo: nis)
-        .getDocuments();
-    final List<DocumentSnapshot> list = snapshot.documents;
-
-    if (list.length == 0) {
-      setState(() {
-        _state = 3;
-      });
-    } else {
-      sendData(nis);
-    }
-  }
-
-  void sendData(nis) async {
-    var test = await databaseReference
-        .collection('siswa')
-        .where('nis', isEqualTo: nis)
-        .getDocuments();
-
-    test.documents.forEach((f) {
-      print(f.data['nama']);
-      String id = f.documentID;
-      int level = f.data['level'];
-      onSuccess(level, id);
-    });
   }
 }

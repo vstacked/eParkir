@@ -4,9 +4,9 @@ import 'package:eparkir/screens/admin/page/scanner.dart';
 import 'package:eparkir/screens/admin/page/showAll.dart';
 import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/view-models/homeAdminViewModel.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stacked/stacked.dart';
 
 class Home extends StatefulWidget {
   final String id;
@@ -16,45 +16,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  void resetPref() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setInt("value", 2);
-    preferences.setString("id", '');
-  }
-
-  String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
-
-  void changeToFalse() async {
-    var test2 = await databaseReference
-        .collection('siswa')
-        .where('hadir', isEqualTo: true)
-        .getDocuments();
-    test2.documents.forEach((f) {
-      String id = f.documentID;
-      Firestore.instance
-          .collection('siswa')
-          .document(id)
-          .updateData({'hadir': false});
-    });
-  }
-
-  void checkDay() async {
-    var test2 = await databaseReference
-        .collection('database')
-        .document('tanggal')
-        .collection(datePick)
-        .getDocuments();
-
-    if (test2.documents.length == 0) {
-      changeToFalse();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    checkDay();
-  }
+  HomeAdminViewModel homeAdminViewModel = HomeAdminViewModel();
 
   @override
   Widget build(BuildContext context) {
@@ -67,76 +29,82 @@ class _HomeState extends State<Home> {
         onPressed: () => Navigator.push(
             context, MaterialPageRoute(builder: (context) => Scanner())),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[welcome(), logOut()]),
-          ),
-          info(width, height),
-          info2(context),
-          filter(context),
-          Divider(
-            thickness: 0.5,
-            color: Colors.black,
-            indent: 20,
-            endIndent: 20,
-          ),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: StreamBuilder(
-                  stream: databaseReference
-                      .collection('database')
-                      .document('tanggal')
-                      .collection(datePick)
-                      .orderBy('datang')
-                      .limit(10)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    int no = 1;
-                    QuerySnapshot data = snapshot.data;
-                    List<DocumentSnapshot> documentSnapshot =
-                        (data?.documents != null) ? data.documents : [];
-                    return DataTable(
-                      horizontalMargin: 10,
-                      headingRowHeight: 40,
-                      columnSpacing: 10,
-                      columns: <DataColumn>[
-                        DataColumn(
-                          label: Text("No."),
-                        ),
-                        DataColumn(
-                          label: Text("NIS"),
-                        ),
-                        DataColumn(
-                          label: Text("Nama"),
-                        ),
-                        DataColumn(
-                          label: Text("Kelas"),
-                        ),
-                        DataColumn(
-                          label: Text("Datang"),
-                        ),
-                      ],
-                      rows: [
-                        for (var d in documentSnapshot)
-                          dataRow(no++, d['nis'], d['nama'], d['kelas'],
-                              d['datang'])
-                      ],
-                    );
-                  },
+      body: ViewModelBuilder<HomeAdminViewModel>.reactive(
+        viewModelBuilder: () => homeAdminViewModel,
+        onModelReady: (model) => model.initState(),
+        builder: (context, model, child) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[welcome(), logOut(model)]),
+              ),
+              info(width, height),
+              info2(context),
+              filter(context),
+              Divider(
+                thickness: 0.5,
+                color: Colors.black,
+                indent: 20,
+                endIndent: 20,
+              ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  height: height,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: StreamBuilder(
+                      stream: databaseReference
+                          .collection('database')
+                          .document('tanggal')
+                          .collection(model.datePick)
+                          .orderBy('datang')
+                          .limit(10)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        int no = 1;
+                        QuerySnapshot data = snapshot.data;
+                        List<DocumentSnapshot> documentSnapshot =
+                            (data?.documents != null) ? data.documents : [];
+                        return DataTable(
+                          horizontalMargin: 10,
+                          headingRowHeight: 40,
+                          columnSpacing: 10,
+                          columns: <DataColumn>[
+                            DataColumn(
+                              label: Text("No."),
+                            ),
+                            DataColumn(
+                              label: Text("NIS"),
+                            ),
+                            DataColumn(
+                              label: Text("Nama"),
+                            ),
+                            DataColumn(
+                              label: Text("Kelas"),
+                            ),
+                            DataColumn(
+                              label: Text("Datang"),
+                            ),
+                          ],
+                          rows: [
+                            for (var d in documentSnapshot)
+                              dataRow(no++, d['nis'], d['nama'], d['kelas'],
+                                  d['datang'])
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -246,7 +214,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  GestureDetector logOut() {
+  GestureDetector logOut(HomeAdminViewModel model) {
     return GestureDetector(
       child: Column(
         children: <Widget>[
@@ -262,7 +230,7 @@ class _HomeState extends State<Home> {
         ],
       ),
       onTap: () {
-        resetPref();
+        model.resetPref();
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => Login()),
