@@ -1,5 +1,4 @@
 import 'package:eparkir/screens/login.dart';
-import 'package:eparkir/view-models/homeAdminViewModel.dart';
 import 'package:eparkir/view-models/logOutViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -40,6 +39,3 @@ class LogOut extends StatelessWidget {
     );
   }
 }
-
-GestureDetector logOut(
-    HomeAdminViewModel model, String id, BuildContext context) {}

@@ -78,9 +78,7 @@ class LoginViewModel extends BaseViewModel {
         return new Text(
           "Login",
           style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
+              color: Colors.white, fontSize: 16.0, fontFamily: 'Jura'),
         );
 
         break;
@@ -92,13 +90,13 @@ class LoginViewModel extends BaseViewModel {
           width: 20,
           child: CircularProgressIndicator(
             strokeWidth: 3.0,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         );
         break;
       case 2:
         afterClick();
-        return Icon(Icons.check, color: Colors.blue);
+        return Icon(Icons.check, color: Colors.white);
         break;
       case 3:
         Timer(Duration(seconds: 2), () {
@@ -106,10 +104,8 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "Data Tidak Ada",
-          style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
+          style:
+              TextStyle(color: Colors.red, fontSize: 16.0, fontFamily: 'Jura'),
         );
         break;
       case 4:
@@ -118,10 +114,8 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "No Internet Connection",
-          style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
+          style:
+              TextStyle(color: Colors.red, fontSize: 16.0, fontFamily: 'Jura'),
         );
         break;
       case 5:
@@ -131,9 +125,7 @@ class LoginViewModel extends BaseViewModel {
         return Text(
           "Sedang Login",
           style: const TextStyle(
-            color: Colors.blue,
-            fontSize: 16.0,
-          ),
+              color: Colors.amber, fontSize: 16.0, fontFamily: 'Jura'),
         );
         break;
       default:
