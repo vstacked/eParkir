@@ -6,22 +6,18 @@ class Snackbar {
     backgroundColor: Colors.red,
     action: SnackBarAction(
       label: "OK",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
+      textColor: Colors.white,
+      onPressed: () {},
     ),
   );
 
   final snackbar = SnackBar(
-    content: Text("Sudah Absen dongg"),
+    content: Text("Sudah Absen"),
     backgroundColor: Colors.red,
     action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
+      label: "OK",
+      textColor: Colors.white,
+      onPressed: () {},
     ),
   );
 
@@ -29,23 +25,19 @@ class Snackbar {
     content: Text("Success"),
     backgroundColor: Colors.green,
     action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
+      label: "OK",
+      textColor: Colors.white,
+      onPressed: () {},
     ),
   );
 
   final snackbarPulang = SnackBar(
-    content: Text("dah pulangg"),
-    backgroundColor: Colors.blue,
+    content: Text("Success"),
+    backgroundColor: Colors.lightBlue,
     action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
+      label: "OK",
+      textColor: Colors.white,
+      onPressed: () {},
     ),
   );
 }

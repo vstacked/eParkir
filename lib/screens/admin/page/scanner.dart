@@ -14,7 +14,16 @@ class _ScannerState extends State<Scanner> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Scanner"),
+        backgroundColor: Colors.teal[100],
+        iconTheme: IconThemeData().copyWith(color: Colors.teal),
+        title: Text(
+          "Scanner",
+          style: TextStyle(
+            fontFamily: 'Lemonada',
+            color: Colors.teal,
+          ),
+        ),
+        elevation: 0,
       ),
       body: Body(),
     );
@@ -43,9 +52,11 @@ class _BodyState extends State<Body> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+    TextStyle style = TextStyle(fontFamily: 'Jura');
 
     return Scaffold(
       key: scannerViewModel.scaffoldKey,
+      backgroundColor: Colors.teal[100],
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ViewModelBuilder<ScannerViewModel>.reactive(
@@ -60,14 +71,14 @@ class _BodyState extends State<Body> {
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5.0),
                       border: Border.all(
-                        color: Colors.red,
+                        color: Colors.teal,
                         width: 3.0,
                       )),
                   child: QRView(
                     key: model.qrKey,
                     onQRViewCreated: model.onQRViewCreated,
                     overlay: QrScannerOverlayShape(
-                      borderColor: Colors.red,
+                      borderColor: Colors.teal,
                       borderRadius: 5,
                       borderLength: 20,
                       borderWidth: 10,
@@ -83,7 +94,23 @@ class _BodyState extends State<Body> {
                   width: width,
                   height: height / 3.5,
                   child: Center(
-                    child: Text("Scan Result : ${model.qrText}"),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          "Scan Result : ",
+                          style: style.copyWith(
+                              fontWeight: FontWeight.bold, fontSize: 15.0),
+                        ),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Text(
+                          model.qrText,
+                          style: style,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

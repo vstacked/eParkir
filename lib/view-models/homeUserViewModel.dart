@@ -30,7 +30,7 @@ class HomeUserViewModel extends BaseViewModel {
 
   Future<ui.Image> _loadOverlayImage() async {
     final completer = Completer<ui.Image>();
-    final byteData = await rootBundle.load('assets/images/logo.png');
+    final byteData = await rootBundle.load('assets/images/logo2.png');
     ui.decodeImageFromList(byteData.buffer.asUint8List(), completer.complete);
     return completer.future;
   }

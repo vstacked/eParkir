@@ -17,8 +17,12 @@ class Welcome extends StatelessWidget {
           return ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 250),
               child: Text(
-                "Selamat Datang, $nama",
+                "Hai, $nama",
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Lemonada',
+                  fontSize: 15.0,
+                ),
               ));
         }
       },

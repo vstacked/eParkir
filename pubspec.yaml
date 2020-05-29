@@ -29,6 +29,7 @@ dependencies:
   stacked: ^1.5.5
   flutter_icons: ^1.1.0
   intro_slider: ^2.3.1
+  persistent_bottom_nav_bar: ^1.5.5  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

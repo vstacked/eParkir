@@ -8,6 +8,7 @@ DataRow dataRow(
       DataCell(
         Text(
           no.toString(),
+          style: TextStyle(fontFamily: 'Jura'),
         ),
         onTap: () => model.tapped(nis, nama, kelas, context, idUser),
       ),
@@ -17,6 +18,7 @@ DataRow dataRow(
             child: Text(
               nis,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontFamily: 'Jura'),
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, idUser),
       ),
@@ -26,6 +28,7 @@ DataRow dataRow(
             child: Text(
               nama,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontFamily: 'Jura'),
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, idUser),
       ),
@@ -35,6 +38,7 @@ DataRow dataRow(
             child: Text(
               kelas,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontFamily: 'Jura'),
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, idUser),
       ),

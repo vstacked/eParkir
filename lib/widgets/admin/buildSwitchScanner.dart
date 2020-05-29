@@ -10,6 +10,7 @@ class BuildSwitchScanner extends StatefulWidget {
 }
 
 class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
+  TextStyle style = TextStyle(fontFamily: 'Jura', fontSize: 13.0);
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -19,7 +20,7 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
           children: <Widget>[
             Text(
               "Flash",
-              style: TextStyle(fontSize: 12.0),
+              style: style,
             ),
             SizedBox(
               height: 3.0,
@@ -29,8 +30,8 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
               valueFontSize: 12.0,
               width: 60,
               showOnOff: true,
-              activeTextColor: Colors.black,
-              inactiveTextColor: Colors.blue[50],
+              activeTextColor: Colors.white,
+              activeColor: Colors.teal,
               value: widget.model.flashStatus,
               onToggle: (val) {
                 if (widget.model.controller != null) {
@@ -53,7 +54,7 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
           children: <Widget>[
             Text(
               "Rotate Camera",
-              style: TextStyle(fontSize: 12.0),
+              style: style,
             ),
             SizedBox(
               height: 3.0,
@@ -63,8 +64,8 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
               valueFontSize: 12.0,
               width: 60,
               showOnOff: true,
-              activeTextColor: Colors.black,
-              inactiveTextColor: Colors.blue[50],
+              activeTextColor: Colors.white,
+              activeColor: Colors.teal,
               value: widget.model.cameraStatus,
               onToggle: (val) {
                 if (widget.model.controller != null) {
@@ -87,7 +88,7 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
           children: <Widget>[
             Text(
               "Pause / Resume",
-              style: TextStyle(fontSize: 12.0),
+              style: style,
             ),
             SizedBox(
               height: 3.0,
@@ -97,8 +98,8 @@ class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
               valueFontSize: 12.0,
               width: 60,
               showOnOff: true,
-              activeTextColor: Colors.black,
-              inactiveTextColor: Colors.blue[50],
+              activeTextColor: Colors.white,
+              activeColor: Colors.teal,
               value: widget.model.prStatus,
               onToggle: (val) {
                 if (val == true) {

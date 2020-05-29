@@ -1,6 +1,7 @@
 import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/view-models/logOutViewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:stacked/stacked.dart';
 
 class LogOut extends StatelessWidget {
@@ -13,29 +14,57 @@ class LogOut extends StatelessWidget {
       viewModelBuilder: () => logOutViewModel,
       builder: (context, model, child) {
         return GestureDetector(
-          child: Column(
-            children: <Widget>[
-              Icon(
-                Icons.highlight_off,
-                color: Colors.red,
-                size: 20,
-              ),
-              Text(
-                "Log Out",
-                style: TextStyle(color: Colors.red, fontSize: 10),
-              )
-            ],
+          child: Icon(
+            MaterialCommunityIcons.logout,
+            color: Colors.redAccent,
+            size: 25.0,
           ),
-          onTap: () {
-            model.resetPref(id);
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => Login()),
-              (Route<dynamic> route) => false,
-            );
-          },
+          onTap: () => shwDialog(context, model),
         );
       },
     );
+  }
+
+  void shwDialog(BuildContext context, LogOutViewModel model) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              "Action",
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
+            content: Text(
+              'Ingin LogOut ?',
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.teal,
+                child: Text(
+                  "Batal",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                color: Colors.red,
+                child: Text(
+                  "LogOut",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
+                onPressed: () {
+                  model.resetPref(id);
+                  Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => Login()),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+              )
+            ],
+          );
+        });
   }
 }

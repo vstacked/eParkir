@@ -65,8 +65,7 @@ class LoginViewModel extends BaseViewModel {
   }
 
   Future pushAndRemoveUntil(Widget to, context) {
-    return Navigator.pushAndRemoveUntil(
-      context,
+    return Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => to),
       (Route<dynamic> route) => false,
     );

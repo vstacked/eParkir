@@ -3,6 +3,7 @@ import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/view-models/historyViewModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 
@@ -16,6 +17,7 @@ class HistoryBody extends StatefulWidget {
 
 class _HistoryBodyState extends State<HistoryBody> {
   HistoryViewModel historyViewModel = HistoryViewModel();
+  TextStyle style = TextStyle(fontFamily: 'Jura');
 
   @override
   Widget build(BuildContext context) {
@@ -24,208 +26,261 @@ class _HistoryBodyState extends State<HistoryBody> {
       onModelReady: (model) => model.initState(),
       builder: (context, model, child) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    width: widget.width / 1.6,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue, width: 1.5),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+            Container(
+              width: widget.width,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 250),
                       child: Text(
                         (model.selectedDate != null)
                             ? DateFormat('EEEE, d MMM, yyyy')
                                 .format(model.selectedDate)
                             : DateFormat('EEEE, d MMM, yyyy')
                                 .format(DateTime.now()),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Jura',
+                          fontSize: 20.0,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 15.0,
-                  ),
-                  Expanded(
-                    child: GestureDetector(
+                    GestureDetector(
                       child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blue, width: 1.5),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+                        color: Colors.teal,
                         child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text("Choose Date")),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            "Choose Date",
+                            style: TextStyle(
+                                color: Colors.white, fontFamily: 'Jura'),
+                          ),
+                        ),
                       ),
                       onTap: () {
                         model.pickDateDialog(context);
                       },
                     ),
-                  ),
-                ],
-              ),
-            ),
-            TextField(
-              controller: model.tecSearch,
-              focusNode: model.searchNode,
-              onChanged: (val) {
-                setState(() {
-                  model.textSearch = val;
-                });
-              },
-              decoration: new InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'Search...',
-                  suffixIcon: (model.textSearch != '')
-                      ? IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () {
-                            setState(() {
-                              model.textSearch = "";
-                            });
-
-                            Future.delayed(Duration(milliseconds: 50))
-                                .then((_) {
-                              model.tecSearch.clear();
-                              model.searchNode.unfocus();
-                            });
-                          },
-                        )
-                      : null),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0, left: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text("Urutkan berdasarkan :"),
-                  GestureDetector(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 1.5),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text("Reset")),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        model.orderByValue = null;
-                        model.sortColumnIndex = null;
-                      });
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Flexible(
               child: Container(
-                width: double.infinity,
+                width: widget.width,
                 height: widget.height,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey,
+                        offset: Offset(0.2, 0.2),
+                        blurRadius: 0.5,
+                        spreadRadius: 0.5,
+                      )
+                    ]),
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: StreamBuilder(
-                      stream: (model.textSearch != '')
-                          ? databaseReference
-                              .collection('database')
-                              .document('tanggal')
-                              .collection(model.datePick)
-                              .where('nisSearch',
-                                  arrayContains: model.textSearch)
-                              .snapshots()
-                          : (model.orderByValue != null)
-                              ? databaseReference
-                                  .collection('database')
-                                  .document('tanggal')
-                                  .collection(model.datePick)
-                                  .orderBy(model.orderByValue,
-                                      descending: !model.sortAsc)
-                                  .snapshots()
-                              : databaseReference
-                                  .collection('database')
-                                  .document('tanggal')
-                                  .collection(model.datePick)
-                                  .orderBy('datang')
-                                  .snapshots(),
-                      builder: (context, snapshot) {
-                        int no = 1;
-                        QuerySnapshot data = snapshot.data;
-                        List<DocumentSnapshot> documentSnapshot =
-                            (data?.documents != null) ? data.documents : [];
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        child: Row(
+                          children: <Widget>[
+                            Flexible(
+                              flex: 9,
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.teal),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: TextField(
+                                  style: style,
+                                  cursorColor: Colors.teal,
+                                  controller: model.tecSearch,
+                                  focusNode: model.searchNode,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      model.textSearch = val;
+                                    });
+                                  },
+                                  decoration: new InputDecoration(
+                                      border: InputBorder.none,
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: Colors.teal,
+                                      ),
+                                      hintText: 'Search NIS...',
+                                      hintStyle: style,
+                                      suffixIcon: (model.textSearch != '')
+                                          ? IconButton(
+                                              icon: Icon(Icons.close),
+                                              onPressed: () {
+                                                setState(() {
+                                                  model.textSearch = "";
+                                                });
 
-                        return DataTable(
-                            horizontalMargin: 10,
-                            headingRowHeight: 40,
-                            columnSpacing: 10,
-                            sortColumnIndex: model.sortColumnIndex,
-                            sortAscending: model.sortAsc,
-                            columns: <DataColumn>[
-                              DataColumn(
-                                label: Text("No."),
+                                                Future.delayed(Duration(
+                                                        milliseconds: 50))
+                                                    .then((_) {
+                                                  model.tecSearch.clear();
+                                                  model.searchNode.unfocus();
+                                                });
+                                              },
+                                            )
+                                          : null),
+                                ),
                               ),
-                              DataColumn(
-                                label: Text("NIS"),
-                                onSort: (columnIndex, sortAscending) {
-                                  print(sortAscending);
-                                  model.orderByValue = 'nis';
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: IconButton(
+                                tooltip: 'Reset',
+                                icon: Icon(
+                                  MaterialCommunityIcons.restart,
+                                  color: Colors.teal,
+                                ),
+                                onPressed: () {
                                   setState(() {
-                                    if (columnIndex == model.sortColumnIndex) {
-                                      model.sortAsc =
-                                          model.sortNisAsc = sortAscending;
-                                    } else {
-                                      model.sortColumnIndex = columnIndex;
-                                      model.sortAsc = model.sortNisAsc;
-                                    }
+                                    model.orderByValue = null;
+                                    model.sortColumnIndex = null;
                                   });
                                 },
                               ),
-                              DataColumn(
-                                label: Text("Nama"),
-                                onSort: (columnIndex, sortAscending) {
-                                  print(sortAscending);
-                                  model.orderByValue = 'nama';
-                                  setState(() {
-                                    if (columnIndex == model.sortColumnIndex) {
-                                      model.sortAsc =
-                                          model.sortNameAsc = sortAscending;
-                                    } else {
-                                      model.sortColumnIndex = columnIndex;
-                                      model.sortAsc = model.sortNameAsc;
-                                    }
-                                  });
-                                },
-                              ),
-                              DataColumn(
-                                label: Text("Kelas"),
-                                onSort: (columnIndex, sortAscending) {
-                                  print(sortAscending);
-                                  model.orderByValue = 'kelas';
-                                  setState(() {
-                                    if (columnIndex == model.sortColumnIndex) {
-                                      model.sortAsc =
-                                          model.sortKelasAsc = sortAscending;
-                                    } else {
-                                      model.sortColumnIndex = columnIndex;
-                                      model.sortAsc = model.sortKelasAsc;
-                                    }
-                                  });
-                                },
-                              ),
-                            ],
-                            rows: [
-                              for (var d in documentSnapshot)
-                                dataRow(no++, d['nis'], d['nama'], d['kelas'],
-                                    context, d, model)
-                            ]);
-                      }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: widget.width,
+                        child: StreamBuilder(
+                            stream: (model.textSearch != '')
+                                ? databaseReference
+                                    .collection('database')
+                                    .document('tanggal')
+                                    .collection(model.datePick)
+                                    .where('nisSearch',
+                                        arrayContains: model.textSearch)
+                                    .snapshots()
+                                : (model.orderByValue != null)
+                                    ? databaseReference
+                                        .collection('database')
+                                        .document('tanggal')
+                                        .collection(model.datePick)
+                                        .orderBy(model.orderByValue,
+                                            descending: !model.sortAsc)
+                                        .snapshots()
+                                    : databaseReference
+                                        .collection('database')
+                                        .document('tanggal')
+                                        .collection(model.datePick)
+                                        .orderBy('datang')
+                                        .snapshots(),
+                            builder: (context, snapshot) {
+                              int no = 1;
+                              QuerySnapshot data = snapshot.data;
+                              List<DocumentSnapshot> documentSnapshot =
+                                  (data?.documents != null)
+                                      ? data.documents
+                                      : [];
+
+                              return DataTable(
+                                  horizontalMargin: 10,
+                                  headingRowHeight: 40,
+                                  columnSpacing: 10,
+                                  sortColumnIndex: model.sortColumnIndex,
+                                  sortAscending: model.sortAsc,
+                                  columns: <DataColumn>[
+                                    DataColumn(
+                                      label: Text(
+                                        "No.",
+                                        style: style,
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "NIS",
+                                        style: style,
+                                      ),
+                                      onSort: (columnIndex, sortAscending) {
+                                        print(sortAscending);
+                                        model.orderByValue = 'nis';
+                                        setState(() {
+                                          if (columnIndex ==
+                                              model.sortColumnIndex) {
+                                            model.sortAsc = model.sortNisAsc =
+                                                sortAscending;
+                                          } else {
+                                            model.sortColumnIndex = columnIndex;
+                                            model.sortAsc = model.sortNisAsc;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Nama",
+                                        style: style,
+                                      ),
+                                      onSort: (columnIndex, sortAscending) {
+                                        print(sortAscending);
+                                        model.orderByValue = 'nama';
+                                        setState(() {
+                                          if (columnIndex ==
+                                              model.sortColumnIndex) {
+                                            model.sortAsc = model.sortNameAsc =
+                                                sortAscending;
+                                          } else {
+                                            model.sortColumnIndex = columnIndex;
+                                            model.sortAsc = model.sortNameAsc;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Kelas",
+                                        style: style,
+                                      ),
+                                      onSort: (columnIndex, sortAscending) {
+                                        print(sortAscending);
+                                        model.orderByValue = 'kelas';
+                                        setState(() {
+                                          if (columnIndex ==
+                                              model.sortColumnIndex) {
+                                            model.sortAsc = model.sortKelasAsc =
+                                                sortAscending;
+                                          } else {
+                                            model.sortColumnIndex = columnIndex;
+                                            model.sortAsc = model.sortKelasAsc;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                  rows: [
+                                    for (var d in documentSnapshot)
+                                      dataRow(no++, d['nis'], d['nama'],
+                                          d['kelas'], context, d, model)
+                                  ]);
+                            }),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            )
+            ),
           ],
         );
       },
@@ -235,11 +290,14 @@ class _HistoryBodyState extends State<HistoryBody> {
 
 DataRow dataRow(
     int no, String nis, nama, kelas, context, dyn, HistoryViewModel model) {
+  TextStyle style = TextStyle(fontFamily: 'Jura');
+
   return DataRow(
     cells: <DataCell>[
       DataCell(
         Text(
           no.toString(),
+          style: style,
         ),
       ),
       DataCell(
@@ -248,6 +306,7 @@ DataRow dataRow(
             child: Text(
               nis,
               overflow: TextOverflow.ellipsis,
+              style: style,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),
@@ -257,6 +316,7 @@ DataRow dataRow(
             child: Text(
               nama,
               overflow: TextOverflow.ellipsis,
+              style: style,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),
@@ -266,6 +326,7 @@ DataRow dataRow(
             child: Text(
               kelas,
               overflow: TextOverflow.ellipsis,
+              style: style,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),

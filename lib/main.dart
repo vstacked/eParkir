@@ -13,7 +13,8 @@ void main() {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(MaterialApp(
       home: Splashscreen(),
-      theme: ThemeData().copyWith(primaryColor: Colors.teal),
+      theme: ThemeData()
+          .copyWith(primaryColor: Colors.teal, accentColor: Colors.teal),
     ));
   });
 }

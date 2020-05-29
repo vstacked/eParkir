@@ -48,35 +48,108 @@ class HistoryViewModel extends BaseViewModel {
   }
 
   void tapped(nis, nama, kelas, context, dyn) {
-  final height = MediaQuery.of(context).size.height;
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Detail Data Siswa'),
-        content: Container(
-          height: height / 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(nis.toString()),
-              Text(nama),
-              Text(kelas),
-              Text("datang ${dyn['datang']}"),
-              Text("pulang ${dyn['pulang']}"),
-            ],
+    final height = MediaQuery.of(context).size.height;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Detail Data Siswa',
+            style: TextStyle(fontFamily: 'Jura'),
           ),
-        ),
-        actions: <Widget>[
-          FlatButton(
-              color: Colors.blue,
-              child: Text("Close"),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-        ],
-      );
-    },
-  );
-}
+          content: Container(
+            height: height / 3,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'NIS',
+                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                  ),
+                  Text(
+                    nis.toString(),
+                    style: TextStyle(
+                        fontFamily: 'Jura',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 7.5),
+                  Text(
+                    'Nama',
+                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                  ),
+                  Text(
+                    nama,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Jura',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 7.5),
+                  Text(
+                    'Kelas',
+                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                  ),
+                  Text(
+                    kelas,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Jura',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 5.0),
+                    child: Divider(
+                      thickness: 0.3,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    'Jam Datang',
+                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                  ),
+                  Text(
+                    dyn['datang'],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Jura',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'Jam Pulang',
+                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                  ),
+                  Text(
+                    dyn['pulang'] ?? '-',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Jura',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+                color: Colors.teal,
+                child: Text(
+                  "Close",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+          ],
+        );
+      },
+    );
+  }
 }

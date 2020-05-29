@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/screens/admin/page/scanner.dart';
+import 'package:eparkir/screens/admin/page/showAll.dart';
 import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/view-models/homeAdminViewModel.dart';
 import 'package:eparkir/widgets/admin/dataRowHome.dart';
-import 'package:eparkir/widgets/admin/filter.dart';
 import 'package:eparkir/widgets/admin/info.dart';
-import 'package:eparkir/widgets/admin/info2.dart';
 import 'package:eparkir/widgets/common/logOut.dart';
 import 'package:eparkir/widgets/common/welcome.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:stacked/stacked.dart';
 
 class Home extends StatefulWidget {
@@ -26,77 +25,168 @@ class _HomeState extends State<Home> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
+    TextStyle style = TextStyle(fontFamily: 'Jura');
+
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.camera_alt),
-        onPressed: () => Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Scanner())),
-      ),
       body: ViewModelBuilder<HomeAdminViewModel>.reactive(
         viewModelBuilder: () => homeAdminViewModel,
         onModelReady: (model) => model.initState(),
         builder: (context, model, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return Stack(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Welcome(id: widget.id),
-                      LogOut(id: widget.id)
-                    ]),
+              Container(
+                width: width,
+                height: height / 3,
+                decoration: BoxDecoration(
+                    color: Colors.teal[100],
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(50),
+                      bottomLeft: Radius.circular(50),
+                    )),
               ),
-              info(width, height),
-              info2(context),
-              filter(context),
-              Divider(
-                thickness: 0.5,
-                color: Colors.black,
-                indent: 20,
-                endIndent: 20,
-              ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  height: height,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: StreamBuilder(
-                      stream: databaseReference
-                          .collection('database')
-                          .document('tanggal')
-                          .collection(model.datePick)
-                          .orderBy('datang')
-                          .limit(10)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        int no = 1;
-                        QuerySnapshot data = snapshot.data;
-                        List<DocumentSnapshot> documentSnapshot =
-                            (data?.documents != null) ? data.documents : [];
-                        return DataTable(
-                          horizontalMargin: 10,
-                          headingRowHeight: 40,
-                          columnSpacing: 10,
-                          columns: <DataColumn>[
-                            DataColumn(label: Text("No.")),
-                            DataColumn(label: Text("NIS")),
-                            DataColumn(label: Text("Nama")),
-                            DataColumn(label: Text("Kelas")),
-                            DataColumn(label: Text("Datang")),
-                          ],
-                          rows: [
-                            for (var d in documentSnapshot)
-                              dataRow(no++, d['nis'], d['nama'], d['kelas'],
-                                  d['datang'])
-                          ],
-                        );
-                      },
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 30.0),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Welcome(id: widget.id),
+                          LogOut(id: widget.id)
+                        ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: info(width, height),
+                  ),
+                  // info2(context),
+                  // filter(context),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 5.0),
+                    child: Divider(
+                      thickness: 0.3,
+                      color: Colors.teal,
                     ),
                   ),
-                ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Container(
+                        width: double.infinity,
+                        height: height,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(5.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey,
+                                offset: Offset(0.1, 0.1),
+                                blurRadius: 0.25,
+                                spreadRadius: 0.25,
+                              )
+                            ]),
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.all(5.0),
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: <Widget>[
+                              StreamBuilder(
+                                stream: databaseReference
+                                    .collection('database')
+                                    .document('tanggal')
+                                    .collection(model.datePick)
+                                    .orderBy('datang')
+                                    .limit(10)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  int no = 1;
+                                  QuerySnapshot data = snapshot.data;
+                                  List<DocumentSnapshot> documentSnapshot =
+                                      (data?.documents != null)
+                                          ? data.documents
+                                          : [];
+                                  return DataTable(
+                                    horizontalMargin: 10,
+                                    headingRowHeight: 40,
+                                    columnSpacing: 10,
+                                    columns: <DataColumn>[
+                                      DataColumn(
+                                          label: Text(
+                                        "No.",
+                                        style: style,
+                                      )),
+                                      DataColumn(
+                                          label: Text(
+                                        "NIS",
+                                        style: style,
+                                      )),
+                                      DataColumn(
+                                          label: Text(
+                                        "Nama",
+                                        style: style,
+                                      )),
+                                      DataColumn(
+                                          label: Text(
+                                        "Kelas",
+                                        style: style,
+                                      )),
+                                      DataColumn(
+                                          label: Text(
+                                        "Datang",
+                                        style: style,
+                                      )),
+                                    ],
+                                    rows: [
+                                      for (var d in documentSnapshot)
+                                        dataRow(no++, d['nis'], d['nama'],
+                                            d['kelas'], d['datang'])
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                width: 90,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.lightGreen,
+                                ),
+                                child: Center(
+                                  child: GestureDetector(
+                                    child: Text(
+                                      "More Detail",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Jura',
+                                        fontWeight: FontWeight.w300,
+                                      ),
+                                    ),
+                                    onTap: () => Navigator.of(context,
+                                            rootNavigator: true)
+                                        .push(
+                                      MaterialPageRoute(
+                                        builder: (context) => ShowAll(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 35,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           );

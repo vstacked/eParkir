@@ -23,6 +23,14 @@ class DataViewModel extends BaseViewModel {
   Snackbar _snackbar = Snackbar();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  FocusNode _nisFocus;
+  FocusNode _namaFocus;
+  FocusNode _kelasFocus;
+  final _key = new GlobalKey<FormState>();
+  TextEditingController _controllerNis;
+  TextEditingController _controllerNama;
+  TextEditingController _controllerKelas;
+
   get tecClear => _tecSearch.clear();
   get tecSearch => _tecSearch;
   get searchNode => _searchNode;
@@ -31,7 +39,13 @@ class DataViewModel extends BaseViewModel {
 
   void initState() {
     _tecSearch = new TextEditingController();
+    _controllerNis = TextEditingController();
+    _controllerNama = TextEditingController();
+    _controllerKelas = TextEditingController();
     _searchNode = FocusNode();
+    _nisFocus = FocusNode();
+    _namaFocus = FocusNode();
+    _kelasFocus = FocusNode();
     _tecSearch.clear();
     textSearch = "";
     checkConnection = CheckConnection();
@@ -66,13 +80,16 @@ class DataViewModel extends BaseViewModel {
       }
     }).then((_) {
       Navigator.pop(context);
+      _controllerNis.clear();
+      _controllerNama.clear();
+      _controllerKelas.clear();
     });
   }
 
   void editDataToFirestore(nis, nama, kelas, id, context) async {
     checkConnection.checkConnection().then((_) {
       if (checkConnection.hasConnection) {
-        return Firestore.instance.collection('siswa').document(id).updateData({
+        return databaseReference.collection('siswa').document(id).updateData({
           'nama': nama,
           'nis': nis,
           'kelas': kelas,
@@ -90,7 +107,7 @@ class DataViewModel extends BaseViewModel {
   void hapusDataToFirestore(id, context) async {
     checkConnection.checkConnection().then((_) {
       if (checkConnection.hasConnection) {
-        return Firestore.instance.collection('siswa').document(id).delete();
+        return databaseReference.collection('siswa').document(id).delete();
       } else {
         return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
       }
@@ -103,12 +120,11 @@ class DataViewModel extends BaseViewModel {
   final snackbar = SnackBar(
     content: Text("NIS Sudah Ada"),
     backgroundColor: Colors.red,
+    behavior: SnackBarBehavior.floating,
     action: SnackBarAction(
-      label: "Undo",
-      textColor: Colors.black,
-      onPressed: () {
-        print('Pressed');
-      },
+      label: "OK",
+      textColor: Colors.white,
+      onPressed: () {},
     ),
   );
 
@@ -128,27 +144,72 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Detail Data Siswa'),
+            title: Text(
+              'Detail Data Siswa',
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
             content: Container(
               height: height / 5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(nis.toString()),
-                  Text(nama),
-                  Text(kelas),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'NIS',
+                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    ),
+                    Text(
+                      nis.toString(),
+                      style: TextStyle(
+                          fontFamily: 'Jura',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 7.5),
+                    Text(
+                      'Nama',
+                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    ),
+                    Text(
+                      nama,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Jura',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 7.5),
+                    Text(
+                      'Kelas',
+                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    ),
+                    Text(
+                      kelas,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Jura',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
             actions: <Widget>[
               FlatButton(
                 color: Colors.red,
-                child: Text("Hapus"),
+                child: Text(
+                  "Hapus",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () => hapusData(idUser, context),
               ),
               FlatButton(
-                color: Colors.blue,
-                child: Text("Ubah"),
+                color: Colors.teal,
+                child: Text(
+                  "Ubah",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () {
                   editData(nis, nama, kelas, height, idUser, context);
                 },
@@ -163,19 +224,31 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Hapus Data"),
-            content: Text('Apakah Anda Yakin ?'),
+            title: Text(
+              "Hapus Data",
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
+            content: Text(
+              'Apakah Anda Yakin ?',
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
             actions: <Widget>[
               FlatButton(
                 color: Colors.blue,
-                child: Text("Batal"),
+                child: Text(
+                  "Batal",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
               FlatButton(
-                color: Colors.green,
-                child: Text("Hapus"),
+                color: Colors.red,
+                child: Text(
+                  "Hapus",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () {
                   hapusDataToFirestore(idUser, context);
                 },
@@ -186,41 +259,115 @@ class DataViewModel extends BaseViewModel {
   }
 
   void editData(nis, nama, kelas, height, idUser, context) {
-    TextEditingController controllerNis =
-        TextEditingController(text: nis.toString());
-    TextEditingController controllerNama = TextEditingController(text: nama);
-    TextEditingController controllerKelas = TextEditingController(text: kelas);
+    _controllerNis = TextEditingController(text: nis);
+    _controllerNama = TextEditingController(text: nama);
+    _controllerKelas = TextEditingController(text: kelas);
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Ubah Data"),
+            title: Text(
+              "Ubah Data",
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
             content: Container(
               height: height / 3,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  TextField(
-                    maxLength: 8,
-                    keyboardType: TextInputType.number,
-                    controller: controllerNis,
+              child: Form(
+                key: _key,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        maxLength: 8,
+                        keyboardType: TextInputType.number,
+                        controller: _controllerNis,
+                        focusNode: _nisFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert NIS" : null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (value) {
+                          _nisFocus.unfocus();
+                          FocusScope.of(context).requestFocus(_namaFocus);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'NIS, ex: 1700xxx',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                      SizedBox(height: 7.5),
+                      TextFormField(
+                        controller: _controllerNama,
+                        focusNode: _namaFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert Nama" : null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (value) {
+                          _namaFocus.unfocus();
+                          FocusScope.of(context).requestFocus(_kelasFocus);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Nama',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                      SizedBox(height: 7.5),
+                      TextFormField(
+                        controller: _controllerKelas,
+                        focusNode: _kelasFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert Kelas" : null;
+                        },
+                        onFieldSubmitted: (value) {
+                          _kelasFocus.unfocus();
+                          if (_key.currentState.validate())
+                            editDataToFirestore(
+                                _controllerNis.text,
+                                _controllerNama.text,
+                                _controllerKelas.text,
+                                idUser,
+                                context);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Kelas',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextField(
-                    controller: controllerNama,
-                  ),
-                  TextField(
-                    controller: controllerKelas,
-                  ),
-                ],
+                ),
               ),
             ),
             actions: <Widget>[
               FlatButton(
                 color: Colors.green,
-                child: Text("Simpan"),
+                child: Text(
+                  "Simpan",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () {
-                  editDataToFirestore(controllerNis.text, controllerNama.text,
-                      controllerKelas.text, idUser, context);
+                  if (_key.currentState.validate()) {
+                    _kelasFocus.unfocus();
+                    editDataToFirestore(
+                        _controllerNis.text,
+                        _controllerNama.text,
+                        _controllerKelas.text,
+                        idUser,
+                        context);
+                  }
                 },
               )
             ],
@@ -229,42 +376,125 @@ class DataViewModel extends BaseViewModel {
   }
 
   void addData(height, context) {
-    TextEditingController controllerNis = TextEditingController();
-    TextEditingController controllerNama = TextEditingController();
-    TextEditingController controllerKelas = TextEditingController();
+    _controllerNis.clear();
+    _controllerNama.clear();
+    _controllerKelas.clear();
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Tambah Data"),
+            title: Text(
+              "Tambah Data",
+              style: TextStyle(fontFamily: 'Jura'),
+            ),
             content: Container(
               height: height / 3,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  TextField(
-                    maxLength: 8,
-                    keyboardType: TextInputType.number,
-                    controller: controllerNis,
+              child: Form(
+                key: _key,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        maxLength: 8,
+                        keyboardType: TextInputType.number,
+                        controller: _controllerNis,
+                        focusNode: _nisFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert NIS" : null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (value) {
+                          _nisFocus.unfocus();
+                          FocusScope.of(context).requestFocus(_namaFocus);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'NIS, ex: 1700xxx',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                      SizedBox(height: 7.5),
+                      TextFormField(
+                        controller: _controllerNama,
+                        focusNode: _namaFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert Nama" : null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (value) {
+                          _namaFocus.unfocus();
+                          FocusScope.of(context).requestFocus(_kelasFocus);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Nama',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                      SizedBox(height: 7.5),
+                      TextFormField(
+                        controller: _controllerKelas,
+                        focusNode: _kelasFocus,
+                        validator: (e) {
+                          return (e.isEmpty) ? "Please Insert Kelas" : null;
+                        },
+                        onFieldSubmitted: (value) {
+                          _kelasFocus.unfocus();
+                          if (_key.currentState.validate())
+                            addDataToFirestore(
+                                _controllerNis.text,
+                                _controllerNama.text,
+                                _controllerKelas.text,
+                                context);
+                        },
+                        cursorColor: Colors.teal,
+                        style: TextStyle(fontFamily: 'Jura'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Kelas',
+                          hintStyle: TextStyle(fontFamily: 'Jura'),
+                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextField(
-                    controller: controllerNama,
-                  ),
-                  TextField(
-                    controller: controllerKelas,
-                  ),
-                ],
+                ),
               ),
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.blue,
-                child: Text("Tambah"),
+                color: Colors.red,
+                child: Text(
+                  "Batal",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
                 onPressed: () {
-                  addDataToFirestore(controllerNis.text, controllerNama.text,
-                      controllerKelas.text, context);
+                  Navigator.of(context).pop();
+                  _controllerNis.clear();
+                  _controllerNama.clear();
+                  _controllerKelas.clear();
                 },
-              )
+              ),
+              FlatButton(
+                color: Colors.teal,
+                child: Text(
+                  "Tambah",
+                  style: TextStyle(fontFamily: 'Jura'),
+                ),
+                onPressed: () {
+                  if (_key.currentState.validate()) {
+                    _kelasFocus.unfocus();
+                    addDataToFirestore(_controllerNis.text,
+                        _controllerNama.text, _controllerKelas.text, context);
+                  }
+                },
+              ),
             ],
           );
         });
