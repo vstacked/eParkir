@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/view-models/historyViewModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,6 @@ class HistoryBody extends StatefulWidget {
 
 class _HistoryBodyState extends State<HistoryBody> {
   HistoryViewModel historyViewModel = HistoryViewModel();
-  TextStyle style = TextStyle(fontFamily: 'Jura');
 
   @override
   Widget build(BuildContext context) {
@@ -43,21 +41,21 @@ class _HistoryBodyState extends State<HistoryBody> {
                             : DateFormat('EEEE, d MMM, yyyy')
                                 .format(DateTime.now()),
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Jura',
-                          fontSize: 20.0,
-                        ),
+                        style: model.style.desc.copyWith(fontSize: 20.0),
                       ),
                     ),
                     GestureDetector(
                       child: Container(
-                        color: Colors.teal,
+                        decoration: BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
                             "Choose Date",
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: 'Jura'),
+                            style:
+                                model.style.desc.copyWith(color: Colors.white),
                           ),
                         ),
                       ),
@@ -105,7 +103,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: TextField(
-                                  style: style,
+                                  style: model.style.desc,
                                   cursorColor: Colors.teal,
                                   controller: model.tecSearch,
                                   focusNode: model.searchNode,
@@ -122,7 +120,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                                         color: Colors.teal,
                                       ),
                                       hintText: 'Search NIS...',
-                                      hintStyle: style,
+                                      hintStyle: model.style.desc,
                                       suffixIcon: (model.textSearch != '')
                                           ? IconButton(
                                               icon: Icon(Icons.close),
@@ -166,27 +164,13 @@ class _HistoryBodyState extends State<HistoryBody> {
                         width: widget.width,
                         child: StreamBuilder(
                             stream: (model.textSearch != '')
-                                ? databaseReference
-                                    .collection('database')
-                                    .document('tanggal')
-                                    .collection(model.datePick)
-                                    .where('nisSearch',
-                                        arrayContains: model.textSearch)
-                                    .snapshots()
+                                ? model.services.whenSearch(
+                                    model.datePick, model.textSearch)
                                 : (model.orderByValue != null)
-                                    ? databaseReference
-                                        .collection('database')
-                                        .document('tanggal')
-                                        .collection(model.datePick)
-                                        .orderBy(model.orderByValue,
-                                            descending: !model.sortAsc)
-                                        .snapshots()
-                                    : databaseReference
-                                        .collection('database')
-                                        .document('tanggal')
-                                        .collection(model.datePick)
-                                        .orderBy('datang')
-                                        .snapshots(),
+                                    ? model.services.whenOrder(model.datePick,
+                                        model.orderByValue, !model.sortAsc)
+                                    : model.services
+                                        .whenNoOrder(model.datePick),
                             builder: (context, snapshot) {
                               int no = 1;
                               QuerySnapshot data = snapshot.data;
@@ -205,13 +189,13 @@ class _HistoryBodyState extends State<HistoryBody> {
                                     DataColumn(
                                       label: Text(
                                         "No.",
-                                        style: style,
+                                        style: model.style.desc,
                                       ),
                                     ),
                                     DataColumn(
                                       label: Text(
                                         "NIS",
-                                        style: style,
+                                        style: model.style.desc,
                                       ),
                                       onSort: (columnIndex, sortAscending) {
                                         print(sortAscending);
@@ -231,7 +215,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                                     DataColumn(
                                       label: Text(
                                         "Nama",
-                                        style: style,
+                                        style: model.style.desc,
                                       ),
                                       onSort: (columnIndex, sortAscending) {
                                         print(sortAscending);
@@ -251,7 +235,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                                     DataColumn(
                                       label: Text(
                                         "Kelas",
-                                        style: style,
+                                        style: model.style.desc,
                                       ),
                                       onSort: (columnIndex, sortAscending) {
                                         print(sortAscending);
@@ -290,14 +274,12 @@ class _HistoryBodyState extends State<HistoryBody> {
 
 DataRow dataRow(
     int no, String nis, nama, kelas, context, dyn, HistoryViewModel model) {
-  TextStyle style = TextStyle(fontFamily: 'Jura');
-
   return DataRow(
     cells: <DataCell>[
       DataCell(
         Text(
           no.toString(),
-          style: style,
+          style: model.style.desc,
         ),
       ),
       DataCell(
@@ -306,7 +288,7 @@ DataRow dataRow(
             child: Text(
               nis,
               overflow: TextOverflow.ellipsis,
-              style: style,
+              style: model.style.desc,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),
@@ -316,7 +298,7 @@ DataRow dataRow(
             child: Text(
               nama,
               overflow: TextOverflow.ellipsis,
-              style: style,
+              style: model.style.desc,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),
@@ -326,7 +308,7 @@ DataRow dataRow(
             child: Text(
               kelas,
               overflow: TextOverflow.ellipsis,
-              style: style,
+              style: model.style.desc,
             )),
         onTap: () => model.tapped(nis, nama, kelas, context, dyn),
       ),

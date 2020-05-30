@@ -1,8 +1,10 @@
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/homeUserViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 Align banner(width, height, HomeUserViewModel model) {
+  TxtStyle style = TxtStyle();
   int timeResult = 0;
   if (model.timeNow != null) {
     DateFormat dateFormat = new DateFormat.Hms();
@@ -20,29 +22,39 @@ Align banner(width, height, HomeUserViewModel model) {
     alignment: Alignment.centerRight,
     child: Container(
       width: width / 1.5,
-      height: height / 3,
-      color: Colors.amber,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text("Sekarang Pukul :"),
-            Text(
-              model.timeNow ?? '',
-              style: TextStyle(fontSize: 40),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              (timeResult > 0)
-                  ? "Kamu terlambat :("
-                  : "${timeResult.abs()} menit lg km terlambat!",
-              style: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
-            ),
-          ],
-        ),
+      height: 150,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: Offset(-2.5, 2.5),
+            blurRadius: 2.5,
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Text(
+            "Sekarang Pukul",
+            style: style.desc.copyWith(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            model.timeNow ?? '',
+            style: style.desc.copyWith(fontSize: 40),
+          ),
+          Text(
+            (timeResult > 0)
+                ? "Kamu Terlambat"
+                : "${timeResult.abs()} menit lagi Kamu terlambat!",
+            style: style.desc.copyWith(
+                color: Colors.red,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w800),
+          ),
+        ],
       ),
     ),
   );

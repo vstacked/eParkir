@@ -1,6 +1,6 @@
+import 'package:eparkir/utils/color.dart';
 import 'package:eparkir/view-models/showAllViewModel.dart';
 import 'package:eparkir/widgets/admin/buildTableShowAll.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:stacked/stacked.dart';
@@ -23,7 +23,7 @@ class _ShowAllState extends State<ShowAll> {
       builder: (context, model, child) {
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.teal[100],
+            backgroundColor: ColorApp().colorTeal100,
             elevation: 0,
             iconTheme: IconThemeData().copyWith(color: Colors.teal),
             title: model.appBarTitle,
@@ -52,7 +52,7 @@ class _ShowAllState extends State<ShowAll> {
               Container(
                 width: width,
                 height: height,
-                color: Colors.teal[100],
+                color: ColorApp().colorTeal100,
               ),
               Padding(
                 padding: const EdgeInsets.all(5.0),

@@ -1,3 +1,5 @@
+import 'package:eparkir/utils/color.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/scannerViewModel.dart';
 import 'package:eparkir/widgets/admin/buildSwitchScanner.dart';
 import 'package:flutter/material.dart';
@@ -10,22 +12,20 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
+  TxtStyle style = TxtStyle();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal[100],
+        backgroundColor: Colors.teal[200],
         iconTheme: IconThemeData().copyWith(color: Colors.teal),
         title: Text(
           "Scanner",
-          style: TextStyle(
-            fontFamily: 'Lemonada',
-            color: Colors.teal,
-          ),
+          style: style.title.copyWith(color: Colors.teal),
         ),
         elevation: 0,
       ),
-      body: Body(),
+      body: Body(style: style),
     );
   }
 }
@@ -33,7 +33,10 @@ class _ScannerState extends State<Scanner> {
 class Body extends StatefulWidget {
   const Body({
     Key key,
+    @required this.style,
   }) : super(key: key);
+
+  final TxtStyle style;
 
   @override
   _BodyState createState() => _BodyState();
@@ -52,11 +55,10 @@ class _BodyState extends State<Body> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    TextStyle style = TextStyle(fontFamily: 'Jura');
 
     return Scaffold(
       key: scannerViewModel.scaffoldKey,
-      backgroundColor: Colors.teal[100],
+      backgroundColor: Colors.teal[200],
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ViewModelBuilder<ScannerViewModel>.reactive(
@@ -99,7 +101,7 @@ class _BodyState extends State<Body> {
                       children: <Widget>[
                         Text(
                           "Scan Result : ",
-                          style: style.copyWith(
+                          style: widget.style.desc.copyWith(
                               fontWeight: FontWeight.bold, fontSize: 15.0),
                         ),
                         SizedBox(
@@ -107,7 +109,7 @@ class _BodyState extends State<Body> {
                         ),
                         Text(
                           model.qrText,
-                          style: style,
+                          style: widget.style.desc,
                         ),
                       ],
                     ),

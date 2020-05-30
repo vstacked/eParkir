@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/services/firestore.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 
@@ -8,13 +9,16 @@ class HomeAdminViewModel extends BaseViewModel {
 
   get datePick => _datePick;
 
+  TxtStyle style = TxtStyle();
+  FirestoreServices services = FirestoreServices();
+
   void initState() {
     checkDay();
     notifyListeners();
   }
 
   void changeToFalse() async {
-    var test2 = await databaseReference
+    var test2 = await services.databaseReference
         .collection('siswa')
         .where('hadir', isEqualTo: true)
         .getDocuments();
@@ -29,7 +33,7 @@ class HomeAdminViewModel extends BaseViewModel {
   }
 
   void checkDay() async {
-    var test2 = await databaseReference
+    var test2 = await services.databaseReference
         .collection('database')
         .document('tanggal')
         .collection(datePick)

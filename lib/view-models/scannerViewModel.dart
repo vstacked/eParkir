@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/services/checkConnection.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/services/firestore.dart';
 import 'package:eparkir/widgets/common/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +19,7 @@ class ScannerViewModel extends BaseViewModel {
   String timeNow = DateFormat('Hm').format(DateTime.now());
   CheckConnection checkConnection;
   Snackbar _snackbar = Snackbar();
+  FirestoreServices services = FirestoreServices();
 
   get controller => _controller;
   get scaffoldKey => _scaffoldKey;
@@ -46,7 +47,7 @@ class ScannerViewModel extends BaseViewModel {
   Future checkUser(String result) async {
     checkConnection.checkConnection().then((_) async {
       if (checkConnection.hasConnection) {
-        final QuerySnapshot snapshot = await databaseReference
+        final QuerySnapshot snapshot = await services.databaseReference
             .collection("database")
             .document('tanggal')
             .collection(dateNow)
@@ -54,7 +55,7 @@ class ScannerViewModel extends BaseViewModel {
             .getDocuments();
         final List<DocumentSnapshot> list = snapshot.documents;
         if (list.length == 0) {
-          var test = await databaseReference
+          var test = await services.databaseReference
               .collection('siswa')
               .where('nis', isEqualTo: result)
               .getDocuments();
@@ -65,10 +66,11 @@ class ScannerViewModel extends BaseViewModel {
             String nama = f.data['nama'];
             String kelas = f.data['kelas'];
             String nis = f.data['nis'];
-            goAbsent(dateNow, id, nama, kelas, nis);
+            String transport = f.data['transportasi'];
+            goAbsent(dateNow, id, nama, kelas, nis, transport);
           });
         } else {
-          var test2 = await databaseReference
+          var test2 = await services.databaseReference
               .collection('database')
               .document('tanggal')
               .collection(dateNow)
@@ -112,20 +114,22 @@ class ScannerViewModel extends BaseViewModel {
     }
   }
 
-  Future goAbsent(String _dateNow, String idUser, nama, kelas, nis) async {
-    var documentReference = databaseReference
+  Future goAbsent(
+      String _dateNow, String idUser, nama, kelas, nis, transportasi) async {
+    var documentReference = services.databaseReference
         .collection('database')
         .document('tanggal')
         .collection(_dateNow)
         .document(idUser);
 
-    databaseReference.runTransaction((transaction) async {
+    services.databaseReference.runTransaction((transaction) async {
       await transaction.set(documentReference, {
         'nama': nama,
         'nis': nis,
         'kelas': kelas,
         'datang': timeNow,
         'pulang': null,
+        'transportasi': transportasi,
         'nisSearch': setSearchParam(nis),
       });
     });

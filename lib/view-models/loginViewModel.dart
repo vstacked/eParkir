@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/screens/admin/homeAdmin.dart';
 import 'package:eparkir/screens/user/homeUser.dart';
 import 'package:eparkir/services/checkConnection.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/services/firestore.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
@@ -16,6 +17,8 @@ class LoginViewModel extends BaseViewModel {
   TextEditingController _controller;
   bool _isEnable = true;
   CheckConnection checkConnection;
+  FirestoreServices services = FirestoreServices();
+  TxtStyle style = TxtStyle();
 
   get key => _key;
   get controller => _controller;
@@ -76,8 +79,7 @@ class LoginViewModel extends BaseViewModel {
       case 0:
         return new Text(
           "Login",
-          style: const TextStyle(
-              color: Colors.white, fontSize: 16.0, fontFamily: 'Jura'),
+          style: style.desc.copyWith(color: Colors.white, fontSize: 16.0),
         );
 
         break;
@@ -103,8 +105,7 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "Data Tidak Ada",
-          style:
-              TextStyle(color: Colors.red, fontSize: 16.0, fontFamily: 'Jura'),
+          style: style.desc.copyWith(color: Colors.red, fontSize: 16.0),
         );
         break;
       case 4:
@@ -113,8 +114,7 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "No Internet Connection",
-          style:
-              TextStyle(color: Colors.red, fontSize: 16.0, fontFamily: 'Jura'),
+          style: style.desc.copyWith(color: Colors.red, fontSize: 16.0),
         );
         break;
       case 5:
@@ -123,8 +123,7 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "Sedang Login",
-          style: const TextStyle(
-              color: Colors.amber, fontSize: 16.0, fontFamily: 'Jura'),
+          style: style.desc.copyWith(color: Colors.amber, fontSize: 16.0),
         );
         break;
       default:
@@ -142,7 +141,7 @@ class LoginViewModel extends BaseViewModel {
   Future checkUser(String nis, context) async {
     checkConnection.checkConnection().then((_) async {
       if (checkConnection.hasConnection) {
-        final QuerySnapshot snapshot = await databaseReference
+        final QuerySnapshot snapshot = await services.databaseReference
             .collection("siswa")
             .where('nis', isEqualTo: nis)
             .getDocuments();
@@ -162,7 +161,7 @@ class LoginViewModel extends BaseViewModel {
   }
 
   void sendData(nis, context) async {
-    var test = await databaseReference
+    var test = await services.databaseReference
         .collection('siswa')
         .where('nis', isEqualTo: nis)
         .getDocuments();

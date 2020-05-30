@@ -2,6 +2,7 @@ import 'package:eparkir/screens/admin/homeAdmin.dart';
 import 'package:eparkir/screens/firstSlider.dart';
 import 'package:eparkir/screens/login.dart';
 import 'package:eparkir/screens/user/homeUser.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -29,9 +30,11 @@ class _SplashscreenState extends State<Splashscreen> {
   bool title = false;
   Color color = Colors.teal[600];
   SharedPreferences _sharedPreferences;
+  TxtStyle style;
 
   @override
   void initState() {
+    style = TxtStyle();
     isLoad = false;
     title = false;
     SharedPreferences.getInstance().then((prefs) {
@@ -98,8 +101,7 @@ class _SplashscreenState extends State<Splashscreen> {
                 alignment: Alignment.bottomCenter,
                 child: Text(
                   'eParkir',
-                  style: TextStyle(
-                    fontFamily: 'Lemonada',
+                  style: style.title.copyWith(
                     color: Colors.teal[400],
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0,

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/view-models/dataViewModel.dart';
 import 'package:eparkir/widgets/admin/dataRowData.dart';
 import 'package:flutter/material.dart';
@@ -63,23 +62,11 @@ class _DataState extends State<Data> {
                   width: double.infinity,
                   child: StreamBuilder(
                     stream: (model.textSearch != '')
-                        ? databaseReference
-                            .collection('siswa')
-                            .where('level', isEqualTo: 0)
-                            .where('nisSearch', arrayContains: model.textSearch)
-                            .snapshots()
+                        ? model.services.whenSearchSiswa(model.textSearch)
                         : (model.orderByValue != null)
-                            ? databaseReference
-                                .collection('siswa')
-                                .where('level', isEqualTo: 0)
-                                .orderBy(model.orderByValue,
-                                    descending: !model.sortAsc)
-                                .snapshots()
-                            : databaseReference
-                                .collection('siswa')
-                                .where('level', isEqualTo: 0)
-                                .orderBy('nis')
-                                .snapshots(),
+                            ? model.services.whenOrderSiswa(
+                                model.orderByValue, !model.sortAsc)
+                            : model.services.whenNoOrderSiswa(),
                     builder: (context, snapshot) {
                       int no = 1;
                       QuerySnapshot data = snapshot.data;
@@ -93,16 +80,10 @@ class _DataState extends State<Data> {
                         sortAscending: model.sortAsc,
                         columns: <DataColumn>[
                           DataColumn(
-                            label: Text(
-                              "No.",
-                              style: TextStyle(fontFamily: 'Jura'),
-                            ),
+                            label: Text("No.", style: model.style.desc),
                           ),
                           DataColumn(
-                            label: Text(
-                              "NIS",
-                              style: TextStyle(fontFamily: 'Jura'),
-                            ),
+                            label: Text("NIS", style: model.style.desc),
                             onSort: (columnIndex, sortAscending) {
                               print(sortAscending);
                               model.orderByValue = 'nis';
@@ -118,10 +99,7 @@ class _DataState extends State<Data> {
                             },
                           ),
                           DataColumn(
-                            label: Text(
-                              "Nama",
-                              style: TextStyle(fontFamily: 'Jura'),
-                            ),
+                            label: Text("Nama", style: model.style.desc),
                             onSort: (columnIndex, sortAscending) {
                               print(sortAscending);
                               model.orderByValue = 'nama';
@@ -137,10 +115,7 @@ class _DataState extends State<Data> {
                             },
                           ),
                           DataColumn(
-                            label: Text(
-                              "Kelas",
-                              style: TextStyle(fontFamily: 'Jura'),
-                            ),
+                            label: Text("Kelas", style: model.style.desc),
                             onSort: (columnIndex, sortAscending) {
                               print(sortAscending);
                               model.orderByValue = 'kelas';
@@ -215,7 +190,7 @@ class _DataState extends State<Data> {
                     model.textSearch = val;
                   });
                 },
-                style: TextStyle(fontFamily: 'Jura'),
+                style: model.style.desc,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                     border: InputBorder.none,
@@ -223,7 +198,7 @@ class _DataState extends State<Data> {
                       Icons.search,
                       color: Colors.teal,
                     ),
-                    hintStyle: TextStyle(fontFamily: 'Jura'),
+                    hintStyle: model.style.desc,
                     hintText: 'Search...',
                     suffixIcon: (model.textSearch != '')
                         ? IconButton(

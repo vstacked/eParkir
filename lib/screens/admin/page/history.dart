@@ -1,3 +1,5 @@
+import 'package:eparkir/utils/color.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/widgets/common/history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,6 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
-  Color color = Colors.teal[100];
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -19,16 +20,16 @@ class _HistoryState extends State<History> {
         elevation: 0,
         title: Text(
           "History",
-          style: TextStyle(color: Colors.teal, fontFamily: 'Lemonada'),
+          style: TxtStyle().title.copyWith(color: Colors.teal),
         ),
-        backgroundColor: color,
+        backgroundColor: ColorApp().colorTeal100,
       ),
       body: Stack(
         children: <Widget>[
           Container(
             height: height,
             width: width,
-            color: color,
+            color: ColorApp().colorTeal100,
           ),
           HistoryBody(
             height: height,

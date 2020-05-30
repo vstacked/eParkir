@@ -1,3 +1,4 @@
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
@@ -13,15 +14,16 @@ class ShowAllViewModel extends BaseViewModel {
 
   String orderByValue;
 
+  TxtStyle style = TxtStyle();
+
   Icon searchIcon = new Icon(Icons.search);
   Widget appBarTitle = new Text(
     "Daftar Hadir Hari ini",
-    style: TextStyle(
-      fontFamily: 'Lemonada',
-      color: Colors.teal,
-      fontSize: 15,
-      fontWeight: FontWeight.bold,
-    ),
+    style: TxtStyle().title.copyWith(
+          color: Colors.teal,
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+        ),
   );
 
   String textSearch;
@@ -44,7 +46,7 @@ class ShowAllViewModel extends BaseViewModel {
           borderRadius: BorderRadius.circular(5),
         ),
         child: TextField(
-          style: TextStyle(fontFamily: 'Jura'),
+          style: style.desc,
           cursorColor: Colors.teal,
           controller: tecSearch,
           keyboardType: TextInputType.number,
@@ -59,7 +61,7 @@ class ShowAllViewModel extends BaseViewModel {
               color: Colors.teal,
             ),
             hintText: 'Search NIS...',
-            hintStyle: TextStyle(fontFamily: 'Jura'),
+            hintStyle: style.desc,
           ),
         ),
       );
@@ -67,12 +69,11 @@ class ShowAllViewModel extends BaseViewModel {
       this.searchIcon = new Icon(Icons.search);
       this.appBarTitle = new Text(
         'Daftar Hadir Hari ini',
-        style: TextStyle(
-          fontFamily: 'Lemonada',
-          color: Colors.teal,
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TxtStyle().title.copyWith(
+              color: Colors.teal,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
       );
       tecSearch.clear();
 
@@ -88,9 +89,11 @@ class ShowAllViewModel extends BaseViewModel {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Detail Data Siswa',
-            style: TextStyle(fontFamily: 'Jura'),
+            style: style.desc,
           ),
           content: Container(
             height: height / 3,
@@ -100,40 +103,52 @@ class ShowAllViewModel extends BaseViewModel {
                 children: <Widget>[
                   Text(
                     'NIS',
-                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    style: style.desc.copyWith(fontSize: 12),
                   ),
                   Text(
                     nis.toString(),
-                    style: TextStyle(
-                        fontFamily: 'Jura',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 7.5),
                   Text(
                     'Nama',
-                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    style: style.desc.copyWith(fontSize: 12),
                   ),
                   Text(
                     nama,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Jura',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 7.5),
                   Text(
                     'Kelas',
-                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    style: style.desc.copyWith(fontSize: 12),
                   ),
                   Text(
                     kelas,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Jura',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 5.0),
+                    child: Divider(
+                      thickness: 0.3,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    'Transportasi',
+                    style: style.desc.copyWith(fontSize: 12),
+                  ),
+                  Text(
+                    dyn['transportasi'] ?? '-',
+                    textAlign: TextAlign.center,
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -145,28 +160,24 @@ class ShowAllViewModel extends BaseViewModel {
                   ),
                   Text(
                     'Jam Datang',
-                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    style: style.desc.copyWith(fontSize: 12),
                   ),
                   Text(
                     dyn['datang'],
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Jura',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 5),
                   Text(
                     'Jam Pulang',
-                    style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                    style: style.desc.copyWith(fontSize: 12),
                   ),
                   Text(
                     dyn['pulang'] ?? '-',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Jura',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                    style: style.desc
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -174,10 +185,9 @@ class ShowAllViewModel extends BaseViewModel {
           ),
           actions: <Widget>[
             FlatButton(
-                color: Colors.teal,
                 child: Text(
                   "Close",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.teal),
                 ),
                 onPressed: () {
                   Navigator.pop(context);

@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/screens/admin/page/showAll.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
 import 'package:eparkir/view-models/homeAdminViewModel.dart';
 import 'package:eparkir/widgets/admin/dataRowHome.dart';
 import 'package:eparkir/widgets/admin/info.dart';
+import 'package:eparkir/widgets/common/background.dart';
 import 'package:eparkir/widgets/common/logOut.dart';
 import 'package:eparkir/widgets/common/welcome.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +25,6 @@ class _HomeState extends State<Home> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
-    TextStyle style = TextStyle(fontFamily: 'Jura');
-
     return Scaffold(
       body: ViewModelBuilder<HomeAdminViewModel>.reactive(
         viewModelBuilder: () => homeAdminViewModel,
@@ -34,16 +32,7 @@ class _HomeState extends State<Home> {
         builder: (context, model, child) {
           return Stack(
             children: <Widget>[
-              Container(
-                width: width,
-                height: height / 3,
-                decoration: BoxDecoration(
-                    color: Colors.teal[100],
-                    borderRadius: BorderRadius.only(
-                      bottomRight: Radius.circular(50),
-                      bottomLeft: Radius.circular(50),
-                    )),
-              ),
+              buildBackground(width, height),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -61,8 +50,6 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: info(width, height),
                   ),
-                  // info2(context),
-                  // filter(context),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20.0, vertical: 5.0),
@@ -94,13 +81,8 @@ class _HomeState extends State<Home> {
                           child: Column(
                             children: <Widget>[
                               StreamBuilder(
-                                stream: databaseReference
-                                    .collection('database')
-                                    .document('tanggal')
-                                    .collection(model.datePick)
-                                    .orderBy('datang')
-                                    .limit(10)
-                                    .snapshots(),
+                                stream:
+                                    model.services.sortLimit10(model.datePick),
                                 builder: (context, snapshot) {
                                   int no = 1;
                                   QuerySnapshot data = snapshot.data;
@@ -114,30 +96,20 @@ class _HomeState extends State<Home> {
                                     columnSpacing: 10,
                                     columns: <DataColumn>[
                                       DataColumn(
-                                          label: Text(
-                                        "No.",
-                                        style: style,
-                                      )),
+                                          label: Text("No.",
+                                              style: model.style.title)),
                                       DataColumn(
-                                          label: Text(
-                                        "NIS",
-                                        style: style,
-                                      )),
+                                          label: Text("NIS",
+                                              style: model.style.title)),
                                       DataColumn(
-                                          label: Text(
-                                        "Nama",
-                                        style: style,
-                                      )),
+                                          label: Text("Nama",
+                                              style: model.style.title)),
                                       DataColumn(
-                                          label: Text(
-                                        "Kelas",
-                                        style: style,
-                                      )),
+                                          label: Text("Kelas",
+                                              style: model.style.title)),
                                       DataColumn(
-                                          label: Text(
-                                        "Datang",
-                                        style: style,
-                                      )),
+                                          label: Text("Datang",
+                                              style: model.style.title)),
                                     ],
                                     rows: [
                                       for (var d in documentSnapshot)
@@ -161,9 +133,8 @@ class _HomeState extends State<Home> {
                                   child: GestureDetector(
                                     child: Text(
                                       "More Detail",
-                                      style: TextStyle(
+                                      style: model.style.desc.copyWith(
                                         color: Colors.white,
-                                        fontFamily: 'Jura',
                                         fontWeight: FontWeight.w300,
                                       ),
                                     ),

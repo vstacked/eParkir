@@ -1,4 +1,5 @@
 import 'package:eparkir/main.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
 import 'package:intro_slider/dot_animation_enum.dart';
 import 'package:intro_slider/intro_slider.dart';
@@ -12,6 +13,7 @@ class FirstSlider extends StatefulWidget {
 
 class _FirstSliderState extends State<FirstSlider> {
   List<Slide> slides = new List();
+  TxtStyle style = TxtStyle();
 
   @override
   void initState() {
@@ -20,8 +22,7 @@ class _FirstSliderState extends State<FirstSlider> {
     slides.add(
       new Slide(
         title: 'Selamat Datang di eParkir',
-        styleTitle: TextStyle(
-          fontFamily: 'Lemonada',
+        styleTitle: style.title.copyWith(
           fontSize: 25.0,
           color: Colors.white,
         ),
@@ -36,15 +37,13 @@ class _FirstSliderState extends State<FirstSlider> {
     slides.add(
       new Slide(
         title: 'Pengertian',
-        styleTitle: TextStyle(
-          fontFamily: 'Lemonada',
+        styleTitle: style.title.copyWith(
           fontSize: 30.0,
           color: Colors.white,
         ),
         description:
             'eParkir adalah aplikasi scanner pengganti "karcis / tiket" saat masuk ke sekolah, menjadi lebih fleksibel dan efisien.',
-        styleDescription: TextStyle(
-          fontFamily: 'Jura',
+        styleDescription: style.desc.copyWith(
           color: Colors.white,
           fontSize: 15.0,
         ),
@@ -58,15 +57,13 @@ class _FirstSliderState extends State<FirstSlider> {
     slides.add(
       new Slide(
         title: 'Manfaat',
-        styleTitle: TextStyle(
-          fontFamily: 'Lemonada',
+        styleTitle: style.title.copyWith(
           fontSize: 30.0,
           color: Colors.white,
         ),
         description:
             'Bagi murid, cara ini lebih efisien. Karena tidak ada ketakutan karcis / tiket itu hilang. Dan juga, aplikasi ini dijalankan di smartphone yang di jaman sekarang ini kebanyakan siswa telah memilikinya.\n\n Bagi petugas, cara ini bisa lebih cepat. Karena tidak perlu membawa karcis / tiket, dan mengambilnya lagi ketika sudah habis. Cukup dengan smartphone, bisa langsung menggunakan scan tanpa perlu repot-repot lagi. \n\n Jadi tunggu apalagi, ayo coba sekarang!!',
-        styleDescription: TextStyle(
-          fontFamily: 'Jura',
+        styleDescription: style.desc.copyWith(
           color: Colors.white,
           fontSize: 15.0,
         ),

@@ -1,3 +1,4 @@
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/scannerViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -10,7 +11,7 @@ class BuildSwitchScanner extends StatefulWidget {
 }
 
 class _BuildSwitchScannerState extends State<BuildSwitchScanner> {
-  TextStyle style = TextStyle(fontFamily: 'Jura', fontSize: 13.0);
+  TextStyle style = TxtStyle().desc.copyWith(fontSize: 13.0);
   @override
   Widget build(BuildContext context) {
     return Row(

@@ -1,3 +1,4 @@
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/loginViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -110,6 +111,7 @@ class _LoginState extends State<Login> {
   }
 
   Widget buildLogin(double width, LoginViewModel model, double height) {
+    TxtStyle style = TxtStyle();
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
@@ -140,8 +142,7 @@ class _LoginState extends State<Login> {
                 ),
                 Text(
                   "eParkir",
-                  style: TextStyle(
-                    fontFamily: 'Lemonada',
+                  style: style.title.copyWith(
                     fontSize: 25.0,
                     color: Colors.teal,
                     fontWeight: FontWeight.w700,
@@ -191,11 +192,11 @@ class _LoginState extends State<Login> {
                       }
                     },
                     cursorColor: Colors.teal,
-                    style: TextStyle(fontFamily: 'Jura'),
+                    style: style.desc,
                     decoration: InputDecoration(
-                      errorStyle: TextStyle(fontFamily: 'Jura'),
-                      counterStyle: TextStyle(fontFamily: 'Jura'),
-                      hintStyle: TextStyle(fontFamily: 'Jura'),
+                      errorStyle: style.desc,
+                      counterStyle: style.desc,
+                      hintStyle: style.desc,
                       hintText: 'ex: 1700xxxx',
                       prefixIcon: Icon(
                         MaterialIcons.input,

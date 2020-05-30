@@ -1,6 +1,7 @@
 import 'package:eparkir/screens/admin/page/data.dart';
 import 'package:eparkir/screens/admin/page/home.dart';
 import 'package:eparkir/screens/admin/page/scanner.dart';
+import 'package:eparkir/utils/navItems.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -14,11 +15,13 @@ class HomeAdmin extends StatefulWidget {
 
 class _HomeAdminState extends State<HomeAdmin> {
   PersistentTabController _controller;
+  NavItems navItems;
 
   @override
   void initState() {
     super.initState();
     _controller = PersistentTabController(initialIndex: 0);
+    navItems = NavItems();
   }
 
   List<Widget> _buildScreens() {
@@ -30,28 +33,8 @@ class _HomeAdminState extends State<HomeAdmin> {
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
-      PersistentBottomNavBarItem(
-        icon: Icon(
-          AntDesign.home,
-          size: 21.0,
-        ),
-        activeColor: Colors.teal,
-        inactiveColor: Colors.grey,
-        isTranslucent: false,
-        title: ('Home'),
-        titleFontSize: 7.5,
-      ),
-      PersistentBottomNavBarItem(
-        icon: Icon(
-          Ionicons.md_list,
-          size: 21.0,
-        ),
-        activeColor: Colors.teal,
-        inactiveColor: Colors.grey,
-        isTranslucent: false,
-        title: ('Data'),
-        titleFontSize: 7.5,
-      ),
+      navItems.navItems(AntDesign.home),
+      navItems.navItems(Ionicons.md_list),
     ];
   }
 
@@ -77,9 +60,7 @@ class _HomeAdminState extends State<HomeAdmin> {
           controller: _controller,
           screens: _buildScreens(),
           items: _navBarsItems(),
-          confineInSafeArea: true,
           showElevation: true,
-          handleAndroidBackButtonPress: true,
           navBarCurve: NavBarCurve.upperCorners,
           navBarCurveRadius: 20.0,
           navBarStyle: NavBarStyle.style5,

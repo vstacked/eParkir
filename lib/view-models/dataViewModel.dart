@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eparkir/services/checkConnection.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/services/firestore.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/widgets/common/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -22,6 +23,9 @@ class DataViewModel extends BaseViewModel {
   CheckConnection checkConnection;
   Snackbar _snackbar = Snackbar();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  FirestoreServices services = FirestoreServices();
+  TxtStyle style = TxtStyle();
 
   FocusNode _nisFocus;
   FocusNode _namaFocus;
@@ -55,25 +59,27 @@ class DataViewModel extends BaseViewModel {
   void addDataToFirestore(nis, nama, kelas, context) async {
     checkConnection.checkConnection().then((_) async {
       if (checkConnection.hasConnection) {
-        var test2 = await databaseReference
+        var test2 = await services.databaseReference
             .collection('siswa')
             .where('nis', isEqualTo: nis)
             .getDocuments();
 
         if (test2.documents.length == 0) {
           DocumentReference documentReference =
-              await databaseReference.collection('siswa').add({
+              await services.databaseReference.collection('siswa').add({
             'nama': nama,
             'nis': nis,
             'kelas': kelas,
             'level': 0,
             'hadir': false,
             'login': false,
+            'transportasi': '',
             'nisSearch': setSearchParam(nis),
           });
           return documentReference;
         } else {
-          return _scaffoldKey.currentState.showSnackBar(snackbar);
+          return _scaffoldKey.currentState
+              .showSnackBar(_snackbar.snackbarNisExist);
         }
       } else {
         return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
@@ -89,7 +95,10 @@ class DataViewModel extends BaseViewModel {
   void editDataToFirestore(nis, nama, kelas, id, context) async {
     checkConnection.checkConnection().then((_) {
       if (checkConnection.hasConnection) {
-        return databaseReference.collection('siswa').document(id).updateData({
+        return services.databaseReference
+            .collection('siswa')
+            .document(id)
+            .updateData({
           'nama': nama,
           'nis': nis,
           'kelas': kelas,
@@ -107,7 +116,10 @@ class DataViewModel extends BaseViewModel {
   void hapusDataToFirestore(id, context) async {
     checkConnection.checkConnection().then((_) {
       if (checkConnection.hasConnection) {
-        return databaseReference.collection('siswa').document(id).delete();
+        return services.databaseReference
+            .collection('siswa')
+            .document(id)
+            .delete();
       } else {
         return _scaffoldKey.currentState.showSnackBar(_snackbar.snackbarNoInet);
       }
@@ -116,17 +128,6 @@ class DataViewModel extends BaseViewModel {
       Navigator.pop(context);
     });
   }
-
-  final snackbar = SnackBar(
-    content: Text("NIS Sudah Ada"),
-    backgroundColor: Colors.red,
-    behavior: SnackBarBehavior.floating,
-    action: SnackBarAction(
-      label: "OK",
-      textColor: Colors.white,
-      onPressed: () {},
-    ),
-  );
 
   setSearchParam(String caseNumber) {
     List<String> caseSearchList = List();
@@ -144,9 +145,11 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text(
               'Detail Data Siswa',
-              style: TextStyle(fontFamily: 'Jura'),
+              style: style.desc,
             ),
             content: Container(
               height: height / 5,
@@ -156,40 +159,34 @@ class DataViewModel extends BaseViewModel {
                   children: <Widget>[
                     Text(
                       'NIS',
-                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                      style: style.desc.copyWith(fontSize: 12),
                     ),
                     Text(
                       nis.toString(),
-                      style: TextStyle(
-                          fontFamily: 'Jura',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                      style: style.desc
+                          .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 7.5),
                     Text(
                       'Nama',
-                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                      style: style.desc.copyWith(fontSize: 12),
                     ),
                     Text(
                       nama,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontFamily: 'Jura',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                      style: style.desc
+                          .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 7.5),
                     Text(
                       'Kelas',
-                      style: TextStyle(fontFamily: 'Jura', fontSize: 12),
+                      style: style.desc.copyWith(fontSize: 12),
                     ),
                     Text(
                       kelas,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontFamily: 'Jura',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                      style: style.desc
+                          .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -197,18 +194,16 @@ class DataViewModel extends BaseViewModel {
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.red,
                 child: Text(
                   "Hapus",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.red),
                 ),
                 onPressed: () => hapusData(idUser, context),
               ),
               FlatButton(
-                color: Colors.teal,
                 child: Text(
                   "Ubah",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.teal),
                 ),
                 onPressed: () {
                   editData(nis, nama, kelas, height, idUser, context);
@@ -224,30 +219,28 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text(
               "Hapus Data",
-              style: TextStyle(fontFamily: 'Jura'),
+              style: style.desc,
             ),
             content: Text(
               'Apakah Anda Yakin ?',
-              style: TextStyle(fontFamily: 'Jura'),
+              style: style.desc,
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.blue,
-                child: Text(
-                  "Batal",
-                  style: TextStyle(fontFamily: 'Jura'),
-                ),
+                child: Text("Batal",
+                    style: style.desc.copyWith(color: Colors.lightGreen)),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
               FlatButton(
-                color: Colors.red,
                 child: Text(
                   "Hapus",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.red),
                 ),
                 onPressed: () {
                   hapusDataToFirestore(idUser, context);
@@ -266,9 +259,11 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text(
               "Ubah Data",
-              style: TextStyle(fontFamily: 'Jura'),
+              style: style.desc,
             ),
             content: Container(
               height: height / 3,
@@ -291,12 +286,12 @@ class DataViewModel extends BaseViewModel {
                           FocusScope.of(context).requestFocus(_namaFocus);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'NIS, ex: 1700xxx',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                       SizedBox(height: 7.5),
@@ -312,12 +307,12 @@ class DataViewModel extends BaseViewModel {
                           FocusScope.of(context).requestFocus(_kelasFocus);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Nama',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                       SizedBox(height: 7.5),
@@ -338,12 +333,12 @@ class DataViewModel extends BaseViewModel {
                                 context);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Kelas',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                     ],
@@ -353,11 +348,8 @@ class DataViewModel extends BaseViewModel {
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.green,
-                child: Text(
-                  "Simpan",
-                  style: TextStyle(fontFamily: 'Jura'),
-                ),
+                child: Text("Simpan",
+                    style: style.desc.copyWith(color: Colors.lightGreen)),
                 onPressed: () {
                   if (_key.currentState.validate()) {
                     _kelasFocus.unfocus();
@@ -383,9 +375,11 @@ class DataViewModel extends BaseViewModel {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text(
               "Tambah Data",
-              style: TextStyle(fontFamily: 'Jura'),
+              style: style.desc,
             ),
             content: Container(
               height: height / 3,
@@ -408,12 +402,12 @@ class DataViewModel extends BaseViewModel {
                           FocusScope.of(context).requestFocus(_namaFocus);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'NIS, ex: 1700xxx',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                       SizedBox(height: 7.5),
@@ -429,12 +423,12 @@ class DataViewModel extends BaseViewModel {
                           FocusScope.of(context).requestFocus(_kelasFocus);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Nama',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                       SizedBox(height: 7.5),
@@ -454,12 +448,12 @@ class DataViewModel extends BaseViewModel {
                                 context);
                         },
                         cursorColor: Colors.teal,
-                        style: TextStyle(fontFamily: 'Jura'),
+                        style: style.desc,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Kelas',
-                          hintStyle: TextStyle(fontFamily: 'Jura'),
-                          errorStyle: TextStyle(fontFamily: 'Jura'),
+                          hintStyle: style.desc,
+                          errorStyle: style.desc,
                         ),
                       ),
                     ],
@@ -469,10 +463,9 @@ class DataViewModel extends BaseViewModel {
             ),
             actions: <Widget>[
               FlatButton(
-                color: Colors.red,
                 child: Text(
                   "Batal",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.red),
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -482,10 +475,9 @@ class DataViewModel extends BaseViewModel {
                 },
               ),
               FlatButton(
-                color: Colors.teal,
                 child: Text(
                   "Tambah",
-                  style: TextStyle(fontFamily: 'Jura'),
+                  style: style.desc.copyWith(color: Colors.teal),
                 ),
                 onPressed: () {
                   if (_key.currentState.validate()) {

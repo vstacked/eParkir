@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eparkir/services/firestore/databaseReference.dart';
+import 'package:eparkir/services/firestore.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/showAllViewModel.dart';
 import 'package:eparkir/widgets/admin/dataRowShowAll.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,8 @@ class BuildTableShowAll extends StatefulWidget {
 }
 
 class _BuildTableShowAllState extends State<BuildTableShowAll> {
-  TextStyle style = TextStyle(fontFamily: 'Jura');
+  FirestoreServices services = FirestoreServices();
+  TxtStyle style = TxtStyle();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,26 +39,12 @@ class _BuildTableShowAllState extends State<BuildTableShowAll> {
         scrollDirection: Axis.vertical,
         child: StreamBuilder(
           stream: (widget.model.textSearch != '')
-              ? databaseReference
-                  .collection('database')
-                  .document('tanggal')
-                  .collection(widget.model.datePick)
-                  .where('nisSearch', arrayContains: widget.model.textSearch)
-                  .snapshots()
+              ? services.whenSearch(
+                  widget.model.datePick, widget.model.textSearch)
               : (widget.model.orderByValue != null)
-                  ? databaseReference
-                      .collection('database')
-                      .document('tanggal')
-                      .collection(widget.model.datePick)
-                      .orderBy(widget.model.orderByValue,
-                          descending: !widget.model.sortAsc)
-                      .snapshots()
-                  : databaseReference
-                      .collection('database')
-                      .document('tanggal')
-                      .collection(widget.model.datePick)
-                      .orderBy('datang')
-                      .snapshots(),
+                  ? services.whenOrder(widget.model.datePick,
+                      widget.model.orderByValue, !widget.model.sortAsc)
+                  : services.whenNoOrder(widget.model.datePick),
           builder: (context, snapshot) {
             int no = 1;
             QuerySnapshot data = snapshot.data;
@@ -73,13 +61,13 @@ class _BuildTableShowAllState extends State<BuildTableShowAll> {
                 DataColumn(
                   label: Text(
                     "No.",
-                    style: style,
+                    style: style.desc,
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     "NIS",
-                    style: style,
+                    style: style.desc,
                   ),
                   onSort: (columnIndex, sortAscending) {
                     print(sortAscending);
@@ -98,7 +86,7 @@ class _BuildTableShowAllState extends State<BuildTableShowAll> {
                 DataColumn(
                   label: Text(
                     "Nama",
-                    style: style,
+                    style: style.desc,
                   ),
                   onSort: (columnIndex, sortAscending) {
                     print(sortAscending);
@@ -117,7 +105,7 @@ class _BuildTableShowAllState extends State<BuildTableShowAll> {
                 DataColumn(
                   label: Text(
                     "Kelas",
-                    style: style,
+                    style: style.desc,
                   ),
                   onSort: (columnIndex, sortAscending) {
                     print(sortAscending);

@@ -1,4 +1,5 @@
 import 'package:eparkir/screens/login.dart';
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/logOutViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -16,7 +17,7 @@ class LogOut extends StatelessWidget {
         return GestureDetector(
           child: Icon(
             MaterialCommunityIcons.logout,
-            color: Colors.redAccent,
+            color: Colors.white,
             size: 25.0,
           ),
           onTap: () => shwDialog(context, model),
@@ -26,35 +27,26 @@ class LogOut extends StatelessWidget {
   }
 
   void shwDialog(BuildContext context, LogOutViewModel model) {
+    TxtStyle style = TxtStyle();
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(
-              "Action",
-              style: TextStyle(fontFamily: 'Jura'),
-            ),
-            content: Text(
-              'Ingin LogOut ?',
-              style: TextStyle(fontFamily: 'Jura'),
-            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text("Action", style: style.desc),
+            content: Text('Ingin LogOut ?', style: style.desc),
             actions: <Widget>[
               FlatButton(
-                color: Colors.teal,
-                child: Text(
-                  "Batal",
-                  style: TextStyle(fontFamily: 'Jura'),
-                ),
+                child: Text("Batal",
+                    style: style.desc.copyWith(color: Colors.teal)),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
               FlatButton(
-                color: Colors.red,
-                child: Text(
-                  "LogOut",
-                  style: TextStyle(fontFamily: 'Jura'),
-                ),
+                child:
+                    Text("Ya", style: style.desc.copyWith(color: Colors.red)),
                 onPressed: () {
                   model.resetPref(id);
                   Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(

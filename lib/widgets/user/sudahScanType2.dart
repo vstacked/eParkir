@@ -1,20 +1,21 @@
+import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
 
-Padding sudahScanType2(height, width, int y) {
+Widget sudahScanType2(height, width, int y) {
+  TxtStyle style = TxtStyle();
   // 0 datang 1 pulang
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 40.0),
-    child: Container(
-      height: height / 5,
-      width: width,
-      decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Text(
-            (y == 0) ? "Sudah Scan datang" : "Sudah Scan pulang",
-            style: TextStyle(color: Colors.green),
-          ),
+  return Container(
+    height: height / 5,
+    width: width,
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Text(
+          (y == 0)
+              ? "Sudah Scan\n Selamat Belajar !"
+              : "Sudah Scan\n Sampai Jumpa !",
+          textAlign: TextAlign.center,
+          style: style.desc.copyWith(color: Colors.teal, fontSize: 20),
         ),
       ),
     ),
