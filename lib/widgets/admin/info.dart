@@ -51,12 +51,11 @@ Container info(double width, double height) {
                   break;
                 case false:
                   belumHadir++;
-                  if (f.data['transportasi'] != '')
-                    (f.data['transportasi'] == 'Motor')
-                        ? detailMotorBelum++
-                        : (f.data['transportasi'] == 'Sepeda')
-                            ? detailSepedaBelum++
-                            : detailUnknown++;
+                  (f.data['transportasi'] == 'Motor')
+                      ? detailMotorBelum++
+                      : (f.data['transportasi'] == 'Sepeda')
+                          ? detailSepedaBelum++
+                          : detailUnknown++;
                   break;
                 default:
               }
