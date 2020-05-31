@@ -3,6 +3,7 @@ import 'package:eparkir/screens/admin/page/history.dart';
 import 'package:eparkir/services/firestore.dart';
 import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 Container info(double width, double height) {
   TextStyle titleStyle = TxtStyle().desc.copyWith(fontSize: 12.0);
@@ -192,40 +193,44 @@ void showDialogDetail(
                   children: <Widget>[
                     Row(
                       children: <Widget>[
+                        Icon(
+                          FontAwesome.motorcycle,
+                          color: Colors.lightGreen,
+                        ),
+                        SizedBox(width: 15),
                         Text(
-                          motor.toString(),
+                          '$motor Siswa',
                           style: style.desc.copyWith(color: Colors.lightGreen),
                         ),
-                        SizedBox(width: 10),
-                        Text('Naik Motor',
-                            style:
-                                style.desc.copyWith(color: Colors.lightGreen))
                       ],
                     ),
                     SizedBox(height: 20),
                     Row(
                       children: <Widget>[
+                        Icon(
+                          FontAwesome.bicycle,
+                          color: Colors.lightGreen,
+                        ),
+                        SizedBox(width: 15),
                         Text(
-                          sepeda.toString(),
+                          '$sepeda Siswa',
                           style: style.desc.copyWith(color: Colors.lightGreen),
                         ),
-                        SizedBox(width: 10),
-                        Text('Naik Sepeda',
-                            style:
-                                style.desc.copyWith(color: Colors.lightGreen))
                       ],
                     ),
                     (unknown != null) ? SizedBox(height: 20) : Container(),
                     (unknown != null)
                         ? Row(
                             children: <Widget>[
+                              Icon(
+                                AntDesign.question,
+                                color: Colors.red,
+                              ),
+                              SizedBox(width: 15),
                               Text(
-                                unknown.toString(),
+                                '$unknown Siswa',
                                 style: style.desc.copyWith(color: Colors.red),
                               ),
-                              SizedBox(width: 10),
-                              Text('Unknown',
-                                  style: style.desc.copyWith(color: Colors.red))
                             ],
                           )
                         : Container(),

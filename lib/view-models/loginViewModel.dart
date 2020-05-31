@@ -105,7 +105,7 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "Data Tidak Ada",
-          style: style.desc.copyWith(color: Colors.red, fontSize: 16.0),
+          style: style.desc.copyWith(color: Colors.white, fontSize: 16.0),
         );
         break;
       case 4:
@@ -114,7 +114,7 @@ class LoginViewModel extends BaseViewModel {
         });
         return Text(
           "No Internet Connection",
-          style: style.desc.copyWith(color: Colors.red, fontSize: 16.0),
+          style: style.desc.copyWith(color: Colors.white, fontSize: 16.0),
         );
         break;
       case 5:

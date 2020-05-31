@@ -62,7 +62,7 @@ class _HomeState extends State<Home> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Container(
-                        width: double.infinity,
+                        width: width,
                         height: height,
                         decoration: BoxDecoration(
                             color: Colors.white,
@@ -90,32 +90,35 @@ class _HomeState extends State<Home> {
                                       (data?.documents != null)
                                           ? data.documents
                                           : [];
-                                  return DataTable(
-                                    horizontalMargin: 10,
-                                    headingRowHeight: 40,
-                                    columnSpacing: 10,
-                                    columns: <DataColumn>[
-                                      DataColumn(
-                                          label: Text("No.",
-                                              style: model.style.title)),
-                                      DataColumn(
-                                          label: Text("NIS",
-                                              style: model.style.title)),
-                                      DataColumn(
-                                          label: Text("Nama",
-                                              style: model.style.title)),
-                                      DataColumn(
-                                          label: Text("Kelas",
-                                              style: model.style.title)),
-                                      DataColumn(
-                                          label: Text("Datang",
-                                              style: model.style.title)),
-                                    ],
-                                    rows: [
-                                      for (var d in documentSnapshot)
-                                        dataRow(no++, d['nis'], d['nama'],
-                                            d['kelas'], d['datang'])
-                                    ],
+                                  return Container(
+                                    width: width,
+                                    child: DataTable(
+                                      horizontalMargin: 10,
+                                      headingRowHeight: 40,
+                                      columnSpacing: 10,
+                                      columns: <DataColumn>[
+                                        DataColumn(
+                                            label: Text("No.",
+                                                style: model.style.desc)),
+                                        DataColumn(
+                                            label: Text("NIS",
+                                                style: model.style.desc)),
+                                        DataColumn(
+                                            label: Text("Nama",
+                                                style: model.style.desc)),
+                                        DataColumn(
+                                            label: Text("Kelas",
+                                                style: model.style.desc)),
+                                        DataColumn(
+                                            label: Text("Datang",
+                                                style: model.style.desc)),
+                                      ],
+                                      rows: [
+                                        for (var d in documentSnapshot)
+                                          dataRow(no++, d['nis'], d['nama'],
+                                              d['kelas'], d['datang'])
+                                      ],
+                                    ),
                                   );
                                 },
                               ),

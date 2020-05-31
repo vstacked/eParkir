@@ -1,4 +1,3 @@
-import 'package:eparkir/utils/color.dart';
 import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/scannerViewModel.dart';
 import 'package:eparkir/widgets/admin/buildSwitchScanner.dart';
@@ -17,7 +16,7 @@ class _ScannerState extends State<Scanner> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal[200],
+        backgroundColor: Colors.teal[50].withOpacity(0.75),
         iconTheme: IconThemeData().copyWith(color: Colors.teal),
         title: Text(
           "Scanner",
@@ -58,7 +57,7 @@ class _BodyState extends State<Body> {
 
     return Scaffold(
       key: scannerViewModel.scaffoldKey,
-      backgroundColor: Colors.teal[200],
+      backgroundColor: Colors.teal[50].withOpacity(0.75),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ViewModelBuilder<ScannerViewModel>.reactive(

@@ -34,6 +34,11 @@ class DataViewModel extends BaseViewModel {
   TextEditingController _controllerNis;
   TextEditingController _controllerNama;
   TextEditingController _controllerKelas;
+  ToolbarOptions toolbarOptions = ToolbarOptions(
+    copy: true,
+    cut: true,
+    paste: true,
+  );
 
   get tecClear => _tecSearch.clear();
   get tecSearch => _tecSearch;
@@ -273,6 +278,7 @@ class DataViewModel extends BaseViewModel {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         maxLength: 8,
                         keyboardType: TextInputType.number,
                         controller: _controllerNis,
@@ -296,6 +302,7 @@ class DataViewModel extends BaseViewModel {
                       ),
                       SizedBox(height: 7.5),
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         controller: _controllerNama,
                         focusNode: _namaFocus,
                         validator: (e) {
@@ -317,6 +324,7 @@ class DataViewModel extends BaseViewModel {
                       ),
                       SizedBox(height: 7.5),
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         controller: _controllerKelas,
                         focusNode: _kelasFocus,
                         validator: (e) {
@@ -352,6 +360,8 @@ class DataViewModel extends BaseViewModel {
                     style: style.desc.copyWith(color: Colors.lightGreen)),
                 onPressed: () {
                   if (_key.currentState.validate()) {
+                    _nisFocus.unfocus();
+                    _namaFocus.unfocus();
                     _kelasFocus.unfocus();
                     editDataToFirestore(
                         _controllerNis.text,
@@ -389,6 +399,7 @@ class DataViewModel extends BaseViewModel {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         maxLength: 8,
                         keyboardType: TextInputType.number,
                         controller: _controllerNis,
@@ -412,6 +423,7 @@ class DataViewModel extends BaseViewModel {
                       ),
                       SizedBox(height: 7.5),
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         controller: _controllerNama,
                         focusNode: _namaFocus,
                         validator: (e) {
@@ -433,6 +445,7 @@ class DataViewModel extends BaseViewModel {
                       ),
                       SizedBox(height: 7.5),
                       TextFormField(
+                        toolbarOptions: toolbarOptions,
                         controller: _controllerKelas,
                         focusNode: _kelasFocus,
                         validator: (e) {

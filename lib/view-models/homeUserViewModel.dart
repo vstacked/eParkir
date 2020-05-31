@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eparkir/api/api_repository.dart';
+import 'package:eparkir/services/checkConnection.dart';
 import 'package:eparkir/services/firestore.dart';
 import 'package:eparkir/utils/textStyle.dart';
 import 'package:flutter/material.dart';
@@ -12,27 +15,32 @@ import 'dart:ui' as ui;
 
 class HomeUserViewModel extends BaseViewModel {
   int _checkType;
-  String timeNow;
 
   FirestoreServices services = FirestoreServices();
   TxtStyle style = TxtStyle();
 
   String datePick = DateFormat('dd-MM-yyyy').format(DateTime.now());
+  ApiRepository apiRepository;
+  DateFormat dateFormat = new DateFormat.Hms();
+  DateTime now = DateTime.now();
+  final clock = Stream<DateTime>.periodic(Duration(seconds: 1), (_) {
+    return DateTime.now();
+  });
+  Random random = Random();
+  int index;
+  String text;
+  String author;
+
+  CheckConnection checkConnection = CheckConnection();
 
   get checkType => _checkType;
 
   void initState(String id, BuildContext context) {
-    Timer.periodic(Duration(seconds: 1), (Timer t) => _getTime());
     checkDay();
     checkTransport(id, context);
     notifyListeners();
-  }
-
-  _getTime() {
-    String _timeNow = DateFormat('Hms').format(DateTime.now());
-
-    timeNow = _timeNow;
-    notifyListeners();
+    apiRepository = ApiRepository();
+    getDataFromApi();
   }
 
   checkTransport(String id, BuildContext context) {
@@ -42,6 +50,20 @@ class HomeUserViewModel extends BaseViewModel {
       String transportasi = data.data['transportasi'];
 
       if (transportasi == '') showdlg(context, id);
+    });
+  }
+
+  getDataFromApi() {
+    checkConnection.checkConnection().then((_) {
+      if (checkConnection.hasConnection) {
+        apiRepository.apiProvider.getDataPostFromApiAsync().then((a) {
+          index = random.nextInt(a.length) + 1;
+          text = a[index].text;
+          author = a[index].author;
+        });
+      } else {
+        text = 'No Internet Connection';
+      }
     });
   }
 
@@ -164,10 +186,10 @@ class HomeUserViewModel extends BaseViewModel {
                       color: Color(0xff1a5441),
                       emptyColor: Colors.teal[50],
                       // size: 320.0,
-                      embeddedImage: snapshot.data,
-                      embeddedImageStyle: QrEmbeddedImageStyle(
-                        size: Size.square(50),
-                      ),
+                      // embeddedImage: snapshot.data,
+                      // embeddedImageStyle: QrEmbeddedImageStyle(
+                      //   size: Size.square(50),
+                      // ),
                     ),
                   );
                 },

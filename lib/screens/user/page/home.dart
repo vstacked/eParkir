@@ -7,6 +7,7 @@ import 'package:eparkir/widgets/common/welcome.dart';
 import 'package:eparkir/widgets/user/type1.dart';
 import 'package:eparkir/widgets/user/type2.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 
 class Home extends StatefulWidget {
@@ -51,9 +52,33 @@ class _HomeState extends State<Home> {
                               LogOut(id: widget.id)
                             ]),
                       ),
-                      (hadir)
-                          ? type2(height, width, model, widget.id)
-                          : type1(height, width, model, widget.id, context)
+                      StreamBuilder<DateTime>(
+                          stream: model.clock,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              String timeNow =
+                                  DateFormat('Hms').format(snapshot.data);
+                              DateTime open = model.dateFormat.parse(timeNow);
+                              open = new DateTime(
+                                  model.now.year,
+                                  model.now.month,
+                                  model.now.day,
+                                  open.hour,
+                                  open.minute);
+                              return (hadir)
+                                  ? type2(height, width, model, widget.id, open)
+                                  : type1(
+                                      height,
+                                      width,
+                                      model,
+                                      widget.id,
+                                      context,
+                                      model.apiRepository,
+                                      open,
+                                      timeNow);
+                            }
+                            return Container();
+                          }),
                     ],
                   );
                 },

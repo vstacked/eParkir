@@ -1,3 +1,4 @@
+import 'package:eparkir/api/api_repository.dart';
 import 'package:eparkir/utils/textStyle.dart';
 import 'package:eparkir/view-models/homeUserViewModel.dart';
 import 'package:eparkir/widgets/user/banner.dart';
@@ -5,16 +6,34 @@ import 'package:eparkir/widgets/user/quoteType1.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
-Widget type1(double height, double width, HomeUserViewModel model, String id,
-    BuildContext context) {
+Widget type1(
+    double height,
+    double width,
+    HomeUserViewModel model,
+    String id,
+    BuildContext context,
+    ApiRepository apiRepository,
+    DateTime open,
+    String timeNow) {
   TxtStyle style = TxtStyle();
   return Column(
     children: <Widget>[
-      banner(width, height, model),
+      BannerType1(
+        width: width,
+        height: height,
+        model: model,
+        open: open,
+        timeNow: timeNow,
+      ),
       SizedBox(
         height: 30,
       ),
-      quoteType1(height, width),
+      QuoteType1(
+        height: height,
+        width: width,
+        apiRepository: apiRepository,
+        model: model,
+      ),
       SizedBox(
         height: 30,
       ),
