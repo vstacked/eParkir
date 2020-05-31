@@ -13,6 +13,7 @@ void main() {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(MaterialApp(
+      title: 'eParkir',
       home: Splashscreen(),
       theme: ThemeData()
           .copyWith(primaryColor: Colors.teal, accentColor: Colors.teal),
